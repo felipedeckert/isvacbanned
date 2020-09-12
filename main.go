@@ -6,8 +6,12 @@ import (
 	"errors"
 	"fmt"
 	"isvacbanned/service"
+	"log"
 	"net/http"
+	"os"
 	"strings"
+
+	tb "gopkg.in/tucnak/telebot.v2"
 )
 
 // Create a struct that mimics the webhook response body
@@ -80,8 +84,35 @@ func sayPolo(chatID int64) error {
 	return nil
 }
 
+//func main() {
+//http.ListenAndServe(":3000", http.HandlerFunc(Handler))
+//}
+
 func main() {
-	http.ListenAndServe(":3000", http.HandlerFunc(Handler))
+	var (
+		port      = os.Getenv("PORT")
+		publicURL = os.Getenv("PUBLIC_URL")
+		token     = os.Getenv("TOKEN")
+	)
+
+	webhook := &tb.Webhook{
+		Listen:   ":" + port,
+		Endpoint: &tb.WebhookEndpoint{PublicURL: publicURL},
+	}
+
+	pref := tb.Settings{
+		Token:  token,
+		Poller: webhook,
+	}
+
+	b, err := tb.NewBot(pref)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	b.Handle("/hello", func(m *tb.Message) {
+		b.Send(m.Sender, "Hi!")
+	})
 }
 
 func updatePlayersStatus() {

@@ -1,9 +1,11 @@
 package main
 
 import (
+	"fmt"
 	"isvacbanned/service"
 	"log"
 	"os"
+	"strconv"
 
 	tb "gopkg.in/tucnak/telebot.v2"
 )
@@ -57,7 +59,11 @@ func setUpBotHandlers(bot *tb.Bot) {
 	bot.Handle("/verify", func(m *tb.Message) {
 		player := service.UnmarshalPlayer(m.Payload)
 
-		bot.Send(m.Sender, player.Players[0].VACBanned)
+		isVACBanned := player.Players[0].VACBanned
+
+		fmt.Printf("M=verifyHandler player=%v isVACBanned=%v\n", m.Payload, isVACBanned)
+
+		bot.Send(m.Sender, strconv.FormatBool(isVACBanned))
 	})
 
 }

@@ -35,22 +35,27 @@ func UpdatePlayersIfNeeded(players map[string]player) {
 	}
 }
 
+func UnmarshalPlayer(value string) player {
+	player := player{}
+	str, err := getPlayerStatus(value)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("%s", str)
+	err = json.Unmarshal(str, &player)
+
+	if err != nil {
+		panic(err)
+	}
+	return player
+}
+
 func GetAllPlayersStatuses(userSteamID map[string]string) map[string]player {
 	players := make(map[string]player)
 	for idx, value := range userSteamID {
-		player := player{}
-		str, err := getPlayerStatus(value)
-		if err != nil {
-			panic(err)
-		}
-		fmt.Printf("%s", str)
-		err = json.Unmarshal(str, &player)
 
-		if err != nil {
-			panic(err)
-		}
-		players[idx] = player
-		fmt.Println(player)
+		players[idx] = UnmarshalPlayer(value)
+		fmt.Println(value)
 	}
 	return players
 }

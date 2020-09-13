@@ -55,6 +55,8 @@ func setUpBotHandlers(bot *tb.Bot) {
 	})
 
 	bot.Handle("/verify", func(m *tb.Message) {
+		service.UnmarshalPlayer(m.Payload)
+
 		bot.Send(m.Sender, m.Payload)
 	})
 

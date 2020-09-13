@@ -5,10 +5,11 @@ import (
 	"isvacbanned/service"
 	"log"
 	"os"
-	"strconv"
 
 	tb "gopkg.in/tucnak/telebot.v2"
 )
+
+const steamIDLength = 17
 
 func main() {
 
@@ -57,15 +58,36 @@ func setUpBotHandlers(bot *tb.Bot) {
 	})
 
 	bot.Handle("/verify", func(m *tb.Message) {
+
+		if len(m.Payload) != steamIDLength {
+			bot.Send(m.Sender, "Invalid Steam ID!")
+			return
+		}
+
 		player := service.UnmarshalPlayer(m.Payload)
+
+		if len(player.Players) == 0 {
+			bot.Send(m.Sender, "Player not found!")
+			return
+		}
 
 		isVACBanned := player.Players[0].VACBanned
 
 		fmt.Printf("M=verifyHandler player=%v isVACBanned=%v\n", m.Payload, isVACBanned)
 
-		bot.Send(m.Sender, strconv.FormatBool(isVACBanned))
+		result := getResponse(isVACBanned)
+
+		bot.Send(m.Sender, result)
 	})
 
+}
+
+func getResponse(isVACBanned bool) string {
+	if isVACBanned {
+		return "This player is VAC banned!"
+	}
+
+	return "This player is NOT VAC banned!"
 }
 
 func updatePlayersStatus() {

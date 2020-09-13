@@ -22,11 +22,11 @@ type playerData struct {
 	EconomyBan       string `json:"EconomyBan"`
 }
 
-type player struct {
+type Player struct {
 	Players []playerData `json:"players"`
 }
 
-func UpdatePlayersIfNeeded(players map[string]player) {
+func UpdatePlayersIfNeeded(players map[string]Player) {
 	for idx, p := range players {
 		data := p.Players[0]
 		if data.VACBanned {
@@ -35,8 +35,8 @@ func UpdatePlayersIfNeeded(players map[string]player) {
 	}
 }
 
-func UnmarshalPlayer(value string) player {
-	player := player{}
+func UnmarshalPlayer(value string) Player {
+	player := Player{}
 	str, err := getPlayerStatus(value)
 	if err != nil {
 		panic(err)
@@ -50,8 +50,8 @@ func UnmarshalPlayer(value string) player {
 	return player
 }
 
-func GetAllPlayersStatuses(userSteamID map[string]string) map[string]player {
-	players := make(map[string]player)
+func GetAllPlayersStatuses(userSteamID map[string]string) map[string]Player {
+	players := make(map[string]Player)
 	for idx, value := range userSteamID {
 
 		players[idx] = UnmarshalPlayer(value)

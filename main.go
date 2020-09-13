@@ -16,7 +16,7 @@ func main() {
 		token     = os.Getenv("TOKEN")
 	)
 
-	local := false
+	local := true
 	if local {
 		port = "3030"                                            //os.Getenv("PORT")
 		publicURL = "https://is-vac-banned.herokuapp.com/"       //os.Getenv("PUBLIC_URL")
@@ -55,9 +55,9 @@ func setUpBotHandlers(bot *tb.Bot) {
 	})
 
 	bot.Handle("/verify", func(m *tb.Message) {
-		service.UnmarshalPlayer(m.Payload)
+		player := service.UnmarshalPlayer(m.Payload)
 
-		bot.Send(m.Sender, m.Payload)
+		bot.Send(m.Sender, player.Players[0].VACBanned)
 	})
 
 }

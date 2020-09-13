@@ -8,6 +8,7 @@ import (
 	"isvacbanned/service"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 
 	tb "gopkg.in/tucnak/telebot.v2"
@@ -89,9 +90,12 @@ func sayPolo(chatID int64) error {
 
 func main() {
 	var (
-		port      = "3030"                                           //os.Getenv("PORT")
-		publicURL = "https://is-vac-banned.herokuapp.com/"           //os.Getenv("PUBLIC_URL")
-		token     = "1324910657:AAFSlJn6TD9EeYNn35MEo-YphYlhYhqc_do" //os.Getenv("TOKEN")
+		//port      = "3030"                                           //os.Getenv("PORT")
+		//publicURL = "https://is-vac-banned.herokuapp.com/"           //os.Getenv("PUBLIC_URL")
+		//token     = "1324910657:AAFSlJn6TD9EeYNn35MEo-YphYlhYhqc_do" //os.Getenv("TOKEN")
+		port      = os.Getenv("PORT")
+		publicURL = os.Getenv("PUBLIC_URL")
+		token     = os.Getenv("TOKEN")
 	)
 
 	webhook := &tb.Webhook{
@@ -112,6 +116,7 @@ func main() {
 	b.Handle("/hello", func(m *tb.Message) {
 		b.Send(m.Sender, "Hi!")
 	})
+	b.Start()
 	log.Println("END")
 }
 

@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"isvacbanned1/service"
 	"log"
 	"net/http"
 )
@@ -31,7 +30,7 @@ func UpdatePlayersIfNeeded(players map[string]player) {
 	for idx, p := range players {
 		data := p.Players[0]
 		if data.VACBanned {
-			service.UpdateVACBanStatus(idx, data.DaysSinceLastBan)
+			UpdateVACBanStatus(idx, data.DaysSinceLastBan)
 		}
 	}
 }

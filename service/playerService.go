@@ -132,5 +132,5 @@ func buildGetUserURL(userName string) string {
 
 func buildGetURL(steamID string) string {
 	fmt.Printf("M=buildGetURL SteamID=%s\n", steamID)
-	return vacBanURL + valveKey + userParamKey + steamID
+	return vacBanURL + valveKey + steamIDParamKey + steamID
 }

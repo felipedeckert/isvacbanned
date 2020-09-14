@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"isvacbanned/service"
 	"log"
@@ -53,26 +54,41 @@ func setUpBot(webhook *tb.Webhook, token string) {
 	bot.Start()
 }
 
-func getSteamID(input string) string {
-	argument := input
-	if strings.Contains(input, "id") {
-
-		argument = strings.Split(input, "/")[2]
-
-	} else if strings.Contains(input, "profile") {
-
-		argument = strings.Split(input, "/")[2]
-
+func getArgumentFromURL(url string) (string, error) {
+	splittedInput := strings.Split(url, "/")
+	if len(splittedInput) == 0 {
+		return "", errors.New("Invalid URL")
 	}
-	log.Printf("M=getSteamID input=%v argument=%v\n", input, argument)
-	return argument
+	return splittedInput[len(splittedInput)-1], nil
+}
+
+func getSteamID(url string) (string, error) {
+	steamID := url
+	var err error
+	var customID string
+	if strings.Contains(url, "id") {
+		customID, err = getArgumentFromURL(url)
+		steamID = service.UnmarshalPlayerByName(customID)
+	} else if strings.Contains(url, "profile") {
+		steamID, err = getArgumentFromURL(url)
+	}
+
+	if err != nil {
+		log.Printf("M=getSteamID input=%v\n", url)
+
+		return "", err
+	}
+
+	log.Printf("M=getSteamID input=%v argument=%v\n", url, steamID)
+
+	return steamID, nil
 }
 
 func verifyHandler(m *tb.Message, bot *tb.Bot) {
-	argument := getSteamID(m.Payload)
+	argument, err := getSteamID(m.Payload)
 
-	if len(argument) != steamIDLength {
-		bot.Send(m.Sender, "Invalid Steam ID!")
+	if err != nil || len(argument) != steamIDLength {
+		bot.Send(m.Sender, "Invalid Param!")
 		return
 	}
 

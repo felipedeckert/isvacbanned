@@ -61,9 +61,10 @@ func UnmarshalPlayerByID(value string) Player {
 	return player
 }
 
-func UnmarshalPlayerByName(value string) string {
+func UnmarshalPlayerByName(customID string) string {
+	log.Printf("M=UnmarshalPlayerByName customID%v=", customID)
 	playerID := PlayerSteamID{}
-	str, err := getPlayerSteamID(value)
+	str, err := getPlayerSteamID(customID)
 	if err != nil {
 		panic(err)
 	}

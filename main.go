@@ -64,7 +64,7 @@ func getSteamID(input string) string {
 		argument = strings.Split(input, "/")[2]
 
 	}
-
+	log.Printf("M=getSteamID input=%v argument=%v\n", input, argument)
 	return argument
 }
 

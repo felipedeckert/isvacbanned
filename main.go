@@ -20,7 +20,7 @@ func main() {
 		token     = os.Getenv("TOKEN")
 	)
 
-	local := true
+	local := false
 	if local {
 		port = "3030"                                            //os.Getenv("PORT")
 		publicURL = "https://is-vac-banned.herokuapp.com/"       //os.Getenv("PUBLIC_URL")

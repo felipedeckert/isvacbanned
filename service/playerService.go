@@ -10,7 +10,18 @@ import (
 
 const valveKey = "DD5F4C5D083B1C9F7AB2CCAC76124DEC"
 const vacBanURL = "http://api.steampowered.com/ISteamUser/GetPlayerBans/v1/?key="
-const paramKey = "&steamids="
+const userURL = "http://api.steampowered.com/ISteamUser/ResolveVanityURL/v0001/?key="
+const userParamKey = "&vanityurl="
+const steamIDParamKey = "&steamids="
+
+type PlayerSteamID struct {
+	Response responseData `json:"response"`
+}
+
+type responseData struct {
+	SteamId string `json:"steamId"`
+	Success int    `json:"success"`
+}
 
 type playerData struct {
 	SteamId          string `json:"SteamId"`
@@ -35,7 +46,7 @@ func UpdatePlayersIfNeeded(players map[string]Player) {
 	}
 }
 
-func UnmarshalPlayer(value string) Player {
+func UnmarshalPlayerByID(value string) Player {
 	player := Player{}
 	str, err := getPlayerStatus(value)
 	if err != nil {
@@ -50,11 +61,27 @@ func UnmarshalPlayer(value string) Player {
 	return player
 }
 
+func UnmarshalPlayerByName(value string) string {
+	playerID := PlayerSteamID{}
+	str, err := getPlayerSteamID(value)
+	if err != nil {
+		panic(err)
+	}
+
+	err = json.Unmarshal(str, &playerID)
+
+	if err != nil {
+		panic(err)
+	}
+
+	return playerID.Response.SteamId
+}
+
 func GetAllPlayersStatuses(userSteamID map[string]string) map[string]Player {
 	players := make(map[string]Player)
 	for idx, value := range userSteamID {
 
-		players[idx] = UnmarshalPlayer(value)
+		players[idx] = UnmarshalPlayerByID(value)
 		fmt.Println(value)
 	}
 	return players
@@ -62,7 +89,7 @@ func GetAllPlayersStatuses(userSteamID map[string]string) map[string]Player {
 
 func getPlayerStatus(steamID string) ([]byte, error) {
 	url := buildGetURL(steamID)
-	fmt.Println(url)
+	fmt.Println("M=getPlayerStatus url=" + url)
 	resp, err := http.Get(url)
 
 	if err != nil {
@@ -79,7 +106,31 @@ func getPlayerStatus(steamID string) ([]byte, error) {
 	return result, nil
 }
 
+func getPlayerSteamID(playerName string) ([]byte, error) {
+	url := buildGetUserURL(playerName)
+	fmt.Println("M=getPlayerSteamID url=" + url)
+	resp, err := http.Get(url)
+
+	if err != nil {
+		fmt.Printf("M=getPlayerSteamID err=%s\n", err)
+		return nil, err
+	}
+
+	result, err := ioutil.ReadAll(resp.Body)
+	defer resp.Body.Close()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return result, nil
+}
+
+func buildGetUserURL(userName string) string {
+	fmt.Printf("M=buildGetUserURL userName=%s\n", userName)
+	return userURL + valveKey + userParamKey + userName
+}
+
 func buildGetURL(steamID string) string {
-	fmt.Printf("SteamID=%s\n", steamID)
-	return vacBanURL + valveKey + paramKey + steamID
+	fmt.Printf("M=buildGetURL SteamID=%s\n", steamID)
+	return vacBanURL + valveKey + userParamKey + steamID
 }

@@ -5,6 +5,7 @@ import (
 	"isvacbanned/service"
 	"log"
 	"os"
+	"strings"
 
 	tb "gopkg.in/tucnak/telebot.v2"
 )
@@ -19,7 +20,7 @@ func main() {
 		token     = os.Getenv("TOKEN")
 	)
 
-	local := false
+	local := true
 	if local {
 		port = "3030"                                            //os.Getenv("PORT")
 		publicURL = "https://is-vac-banned.herokuapp.com/"       //os.Getenv("PUBLIC_URL")
@@ -52,33 +53,51 @@ func setUpBot(webhook *tb.Webhook, token string) {
 	bot.Start()
 }
 
+func getSteamID(input string) string {
+	argument := input
+	if strings.Contains(input, "id") {
+
+		argument = strings.Split(input, "/")[2]
+
+	} else if strings.Contains(input, "profile") {
+
+		argument = strings.Split(input, "/")[2]
+
+	}
+
+	return argument
+}
+
+func verifyHandler(m *tb.Message, bot *tb.Bot) {
+	argument := getSteamID(m.Payload)
+
+	if len(argument) != steamIDLength {
+		bot.Send(m.Sender, "Invalid Steam ID!")
+		return
+	}
+
+	player := service.UnmarshalPlayerByID(argument)
+
+	if len(player.Players) == 0 {
+		bot.Send(m.Sender, "Player not found!")
+		return
+	}
+
+	isVACBanned := player.Players[0].VACBanned
+
+	fmt.Printf("M=verifyHandler player=%v isVACBanned=%v\n", argument, isVACBanned)
+
+	result := getResponse(isVACBanned)
+
+	bot.Send(m.Sender, result)
+}
+
 func setUpBotHandlers(bot *tb.Bot) {
 	bot.Handle("/hello", func(m *tb.Message) {
 		bot.Send(m.Sender, "Hi!")
 	})
 
-	bot.Handle("/verify", func(m *tb.Message) {
-
-		if len(m.Payload) != steamIDLength {
-			bot.Send(m.Sender, "Invalid Steam ID!")
-			return
-		}
-
-		player := service.UnmarshalPlayer(m.Payload)
-
-		if len(player.Players) == 0 {
-			bot.Send(m.Sender, "Player not found!")
-			return
-		}
-
-		isVACBanned := player.Players[0].VACBanned
-
-		fmt.Printf("M=verifyHandler player=%v isVACBanned=%v\n", m.Payload, isVACBanned)
-
-		result := getResponse(isVACBanned)
-
-		bot.Send(m.Sender, result)
-	})
+	bot.Handle("/verify", func(m *tb.Message) { verifyHandler(m, bot) })
 
 }
 

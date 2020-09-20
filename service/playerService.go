@@ -14,6 +14,7 @@ const userURL = "http://api.steampowered.com/ISteamUser/ResolveVanityURL/v0001/?
 const userParamKey = "&vanityurl="
 const steamIDParamKey = "&steamids="
 
+// PlayerSteamID is the Player Steam ID Struct returned by the steam API (userURL)
 type PlayerSteamID struct {
 	Response responseData `json:"response"`
 }
@@ -33,22 +34,28 @@ type playerData struct {
 	EconomyBan       string `json:"EconomyBan"`
 }
 
+// Player represents a list of players BAN data
 type Player struct {
 	Players []playerData `json:"players"`
 }
 
-func UpdatePlayersIfNeeded(players map[string]Player) {
+func updatePlayersIfNeeded(players map[string]Player, spreadsheetID string) {
+	fmt.Println("M=updatePlayersIfNeeded Aperte Enter para continuar!")
+	//reader := bufio.NewReader(os.Stdin)
+	//reader.ReadString('\n')
 	for idx, p := range players {
 		data := p.Players[0]
 		if data.VACBanned {
-			UpdateVACBanStatus(idx, data.DaysSinceLastBan)
+			fmt.Println("M=updatePlayersIfNeeded VAC " + data.SteamId)
+			UpdateVACBanStatus(idx, data.DaysSinceLastBan, spreadsheetID)
 		}
 	}
 }
 
-func UnmarshalPlayerByID(value string) Player {
+// UnmarshalPlayerByID returns a player and its data obtained from Steam API
+func UnmarshalPlayerByID(steamID string) Player {
 	player := Player{}
-	str, err := getPlayerStatus(value)
+	str, err := getPlayerStatus(steamID)
 	if err != nil {
 		panic(err)
 	}
@@ -61,7 +68,7 @@ func UnmarshalPlayerByID(value string) Player {
 	return player
 }
 
-func UnmarshalPlayerByName(customID string) string {
+func unmarshalPlayerByName(customID string) string {
 	log.Printf("M=UnmarshalPlayerByName customID%v=", customID)
 	playerID := PlayerSteamID{}
 	str, err := getPlayerSteamID(customID)
@@ -78,7 +85,10 @@ func UnmarshalPlayerByName(customID string) string {
 	return playerID.Response.SteamId
 }
 
-func GetAllPlayersStatuses(userSteamID map[string]string) map[string]Player {
+func getAllPlayersStatuses(userSteamID map[string]string) map[string]Player {
+	fmt.Println("M=getAllPlayersStatuses Aperte Enter para continuar!")
+	//reader := bufio.NewReader(os.Stdin)
+	//reader.ReadString('\n')
 	players := make(map[string]Player)
 	for idx, value := range userSteamID {
 
@@ -90,11 +100,11 @@ func GetAllPlayersStatuses(userSteamID map[string]string) map[string]Player {
 
 func getPlayerStatus(steamID string) ([]byte, error) {
 	url := buildGetURL(steamID)
-	fmt.Println("M=getPlayerStatus url=" + url)
+	log.Printf("M=getPlayerStatus url=%v\n", url)
 	resp, err := http.Get(url)
 
 	if err != nil {
-		fmt.Printf("M=getPlayerStatus err=%s\n", err)
+		log.Printf("M=getPlayerStatus err=%s\n", err)
 		return nil, err
 	}
 
@@ -109,11 +119,11 @@ func getPlayerStatus(steamID string) ([]byte, error) {
 
 func getPlayerSteamID(playerName string) ([]byte, error) {
 	url := buildGetUserURL(playerName)
-	fmt.Println("M=getPlayerSteamID url=" + url)
+	log.Printf("M=getPlayerSteamID url=%v\n" + url)
 	resp, err := http.Get(url)
 
 	if err != nil {
-		fmt.Printf("M=getPlayerSteamID err=%s\n", err)
+		log.Printf("M=getPlayerSteamID err=%s\n", err)
 		return nil, err
 	}
 
@@ -134,4 +144,16 @@ func buildGetUserURL(userName string) string {
 func buildGetURL(steamID string) string {
 	fmt.Printf("M=buildGetURL SteamID=%s\n", steamID)
 	return vacBanURL + valveKey + steamIDParamKey + steamID
+}
+
+//UpdatePlayersStatus updates players status on fiver spreadsheet
+func UpdatePlayersStatus(spreadsheetID string) {
+	fmt.Printf("M=UpdatePlayersStatus spreadsheetID=%v Aperte Enter para continuar!\n", spreadsheetID)
+	//reader := bufio.NewReader(os.Stdin)
+	//reader.ReadString('\n')
+	userSteamID := GetSteamIDs(spreadsheetID)
+
+	players := getAllPlayersStatuses(userSteamID)
+
+	updatePlayersIfNeeded(players, spreadsheetID)
 }

@@ -1,6 +1,7 @@
 package service
 
 import (
+	"bufio"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -8,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"time"
 
 	"golang.org/x/net/context"
 	"golang.org/x/oauth2"
@@ -15,7 +17,7 @@ import (
 	"google.golang.org/api/sheets/v4"
 )
 
-const spreadsheetId = "1yCglGeasnJtYsTrEvfGCoTM2syxmt_9_DwlsGeaITEc"
+//const spreadsheetID = "1yCglGeasnJtYsTrEvfGCoTM2syxmt_9_DwlsGeaITEc"
 const yes = "YES"
 
 // Retrieve a token, saves the token, then returns the generated client.
@@ -54,6 +56,7 @@ func getTokenFromWeb(config *oauth2.Config) *oauth2.Token {
 func tokenFromFile(file string) (*oauth2.Token, error) {
 	f, err := os.Open(file)
 	if err != nil {
+		fmt.Println("M=tokenFromFile err=" + err.Error())
 		return nil, err
 	}
 	defer f.Close()
@@ -73,15 +76,25 @@ func saveToken(path string, token *oauth2.Token) {
 	json.NewEncoder(f).Encode(token)
 }
 
-func GetSteamIDs() map[string]string {
-
+//GetSteamIDs return a map of row ID and steam ID of a giver spreadsheet
+func GetSteamIDs(spreadsheetID string) map[string]string {
+	fmt.Printf("M=GetSteamIDs step=START spreadsheetID=%v Aperte Enter para continuar!\n", spreadsheetID)
+	reader := bufio.NewReader(os.Stdin)
+	//reader.ReadString('\n')
 	srv := authenticate()
 
 	readRange := "Cheaters!A2:D"
-	resp, err := srv.Spreadsheets.Values.Get(spreadsheetId, readRange).Do()
+	fmt.Printf("M=GetSteamIDs spreadSheetID=%v step=1 Aperte Enter para continuar!\n", spreadsheetID)
+	reader.ReadString('\n')
+	resp, err := srv.Spreadsheets.Values.Get(spreadsheetID, readRange).Do()
 	if err != nil {
-		log.Fatalf("Unable to retrieve data from sheet: %v", err)
+		fmt.Println("M=GetSteamIDs step=2 Aperte Enter para continuar!")
+		reader.ReadString('\n')
+		fmt.Printf("Unable to retrieve data from sheet: %v\n", err)
 	}
+
+	fmt.Println("M=GetSteamIDs step=3 Aperte Enter para continuar!")
+	reader.ReadString('\n')
 
 	if len(resp.Values) == 0 {
 		fmt.Println("No data found.")
@@ -95,43 +108,57 @@ func GetSteamIDs() map[string]string {
 		fmt.Printf("%v \n", row[3])
 		result[row[0].(string)] = row[3].(string)
 	}
-
+	fmt.Println("M=GetSteamIDs step=END Aperte Enter para continuar!")
+	reader.ReadString('\n')
 	return result
 }
 
-func UpdateVACBanStatus(rowID string, daysSinceLastBan int) {
-
+//UpdateVACBanStatus sets the vac ban status to YES, updates daysSinceLastBan and update date
+func UpdateVACBanStatus(rowID string, daysSinceLastBan int, spreadsheetID string) {
+	fmt.Println("M=UpdateVACBanStatus step=START Aperte Enter para continuar!")
+	//reader := bufio.NewReader(os.Stdin)
+	//reader.ReadString('\n')
 	srv := authenticate()
 
 	var vr sheets.ValueRange
-	myval := []interface{}{yes, strconv.Itoa(daysSinceLastBan)}
+	dateFormat := "01/02/2006 15:04:05"
+	currTime := time.Now().Format(dateFormat)
+	myval := []interface{}{yes, strconv.Itoa(daysSinceLastBan), currTime}
+
 	vr.Values = append(vr.Values, myval)
 
-	writeRange := "J" + rowID + ":K"
-	_, err := srv.Spreadsheets.Values.Update(spreadsheetId, writeRange, &vr).ValueInputOption("RAW").Do()
+	writeRange := "J" + rowID + ":L"
+	_, err := srv.Spreadsheets.Values.Update(spreadsheetID, writeRange, &vr).ValueInputOption("RAW").Do()
 	if err != nil {
-		log.Fatalf("Unable to retrieve data from sheet: %v", err)
+		fmt.Printf("Unable to retrieve data from sheet: %v\n", err)
 	}
+	fmt.Println("M=UpdateVACBanStatus step=START Aperte Enter para continuar!")
+	//reader.ReadString('\n')
 
 }
 
 func authenticate() *sheets.Service {
+	fmt.Println("M=authenticate step=START Aperte Enter para continuar!")
+	//reader := bufio.NewReader(os.Stdin)
+	//reader.ReadString('\n')
 	b, err := ioutil.ReadFile("credentials.json")
 	if err != nil {
-		log.Fatalf("Unable to read client secret file: %v", err)
+		fmt.Printf("Unable to read client secret file: %v\n", err)
 	}
 
 	// If modifying these scopes, delete your previously saved token.json.
 	config, err := google.ConfigFromJSON(b, "https://www.googleapis.com/auth/spreadsheets")
 	if err != nil {
-		log.Fatalf("Unable to parse client secret file to config: %v", err)
+		fmt.Printf("Unable to parse client secret file to config: %v\n", err)
 	}
 	client := getClient(config)
 
 	srv, err := sheets.New(client)
 	if err != nil {
-		log.Fatalf("Unable to retrieve Sheets client: %v", err)
+		fmt.Printf("Unable to retrieve Sheets client: %v\n", err)
 	}
 
+	fmt.Println("M=authenticate step=END Aperte Enter para continuar!")
+	//reader.ReadString('\n')
 	return srv
 }

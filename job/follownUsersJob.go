@@ -1,10 +1,10 @@
 package job
 
 import (
+	"fmt"
 	"isvacbanned/model"
 	"isvacbanned/service"
 	"net/http"
-	"os"
 	"strconv"
 	"time"
 
@@ -19,33 +19,44 @@ const telegramTextParam = "&text="
 
 // RunScheduler sets up the scheduler to check users status
 func RunScheduler() {
+	fmt.Println("RunScheduler")
 	scheduler := gocron.NewScheduler(time.UTC)
 
-	scheduler.Every(2).Minutes().Do(checkFollownUsers)
+	scheduler.Every(30).Seconds().Do(checkFollownUsers)
+
+	scheduler.StartAsync()
 }
 
 func checkFollownUsers() {
-	myMap := model.GetAllFollownUsers()
+	fmt.Println("checkFollownUsers")
+	myMap := model.GetAllIncompletedFollowedUsers()
+
+	idsToUpdate := make([]int, 0)
 
 	for chatID, steamIDList := range myMap {
-		for _, steamID := range steamIDList {
-			player := service.UnmarshalPlayerByID(steamID)
+		for _, users := range steamIDList {
+			player := service.UnmarshalPlayerByID(users.SteamID)
 			playerData := player.Players[0]
 			if playerData.VACBanned {
-				sendMessageToUser(chatID, steamID, playerData.DaysSinceLastBan)
+				sendMessageToUser(chatID, users.SteamID, playerData.DaysSinceLastBan)
+				idsToUpdate = append(idsToUpdate, users.ID)
 			}
 		}
+	}
+	if len(idsToUpdate) > 0 {
+		model.SetFollowedUserToCompleted(idsToUpdate)
 	}
 }
 
 func sendMessageToUser(chatID int64, steamID string, daysSinceLastBan int) {
-	token := os.Getenv("TOKEN")
+	token := "1324910657:AAFSlJn6TD9EeYNn35MEo-YphYlhYhqc_do"
+	//token := os.Getenv("TOKEN")
 
-	message := buildMessage(steamID)
+	message := buildMessage(steamID, daysSinceLastBan)
 	sendText := telegramAPIURL + token + telegramMethod + telegramChatIDParam + strconv.FormatInt(chatID, 10) + telegramTextParam + message
 	http.Get(sendText)
 }
 
-func buildMessage(steamID string) string {
-	return "The user " + steamProfileURL + steamID + " has been BANNED!"
+func buildMessage(steamID string, daysSinceLastBan int) string {
+	return "The user " + steamProfileURL + steamID + " has been BANNED " + strconv.Itoa(daysSinceLastBan) + " days ago!"
 }

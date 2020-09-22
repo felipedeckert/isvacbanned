@@ -60,6 +60,7 @@ func verifyHandler(m *tb.Message, bot *tb.Bot) {
 func followHandler(m *tb.Message, bot *tb.Bot) {
 	steamID, err := getSteamID(m.Payload)
 
+	fmt.Printf("M=followHandler payload=%v chatID=%v\n", m.Payload, m.Chat.ID)
 	if err != nil || len(steamID) != steamIDLength {
 		bot.Send(m.Sender, "Invalid Param!")
 		return

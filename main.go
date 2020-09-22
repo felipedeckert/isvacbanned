@@ -28,9 +28,9 @@ func startTelegramBot() {
 		token     = os.Getenv("TOKEN")
 	)
 
-	local := false
+	local := true
 	if local {
-		port = "3030"                                            //os.Getenv("PORT")
+		port = "3000"                                            //os.Getenv("PORT")
 		publicURL = "https://is-vac-banned.herokuapp.com/"       //os.Getenv("PUBLIC_URL")
 		token = "1324910657:AAFSlJn6TD9EeYNn35MEo-YphYlhYhqc_do" //os.Getenv("TOKEN")
 	}
@@ -39,6 +39,8 @@ func startTelegramBot() {
 		Listen:   ":" + port,
 		Endpoint: &tb.WebhookEndpoint{PublicURL: publicURL},
 	}
+
+	job.RunScheduler()
 
 	service.SetUpBot(webhook, token)
 

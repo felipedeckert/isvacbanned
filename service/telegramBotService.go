@@ -58,6 +58,7 @@ func verifyHandler(m *tb.Message, bot *tb.Bot) {
 }
 
 func followHandler(m *tb.Message, bot *tb.Bot) {
+	userID := getUserID(m.Sender)
 	steamID, err := getSteamID(m.Payload)
 
 	fmt.Printf("M=followHandler payload=%v chatID=%v\n", m.Payload, m.Chat.ID)
@@ -66,7 +67,9 @@ func followHandler(m *tb.Message, bot *tb.Bot) {
 		return
 	}
 
-	model.FollowSteamUser(m.Chat.ID, steamID)
+	currNickname := GetPlayerCurrentNickname(steamID)
+
+	model.FollowSteamUser(m.Chat.ID, steamID, currNickname, userID)
 
 	bot.Send(m.Sender, "Following user "+steamID)
 }

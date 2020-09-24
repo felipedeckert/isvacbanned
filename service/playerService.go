@@ -11,12 +11,21 @@ import (
 const valveKey = "DD5F4C5D083B1C9F7AB2CCAC76124DEC"
 const vacBanURL = "http://api.steampowered.com/ISteamUser/GetPlayerBans/v1/?key="
 const userURL = "http://api.steampowered.com/ISteamUser/ResolveVanityURL/v0001/?key="
+const playerSummaryURL = "http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key="
 const userParamKey = "&vanityurl="
 const steamIDParamKey = "&steamids="
 
 // PlayerSteamID is the Player Steam ID Struct returned by the steam API (userURL)
 type PlayerSteamID struct {
 	Response responseData `json:"response"`
+}
+
+type PlayerNickname struct {
+	Response playerNicknameData `json:"response"`
+}
+
+type responseNicknameData struct {
+	Personaname string `json:"personaname"`
 }
 
 type responseData struct {
@@ -32,6 +41,10 @@ type playerData struct {
 	DaysSinceLastBan int    `json:"DaysSinceLastBan"`
 	NumberOfGameBans int    `json:"NumberOfGameBans"`
 	EconomyBan       string `json:"EconomyBan"`
+}
+
+type playerNicknameData struct {
+	Players []responseNicknameData `json:"players"`
 }
 
 // Player represents a list of players BAN data
@@ -134,6 +147,40 @@ func getPlayerSteamID(playerName string) ([]byte, error) {
 	}
 
 	return result, nil
+}
+
+// GetPlayerCurrentNickname gets the player identified by steamID current nickname
+func GetPlayerCurrentNickname(steamID string) string {
+	url := buildGetPlayerSummaryURL(steamID)
+	log.Printf("M=getPLayerCurrentNickname url=%v\n", url)
+	resp, err := http.Get(url)
+
+	if err != nil {
+		log.Printf("M=getPlayerSteamID err=%s\n", err)
+		log.Fatal(err)
+	}
+
+	result, err := ioutil.ReadAll(resp.Body)
+	defer resp.Body.Close()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	playerNickname := PlayerNickname{}
+
+	err = json.Unmarshal(result, &playerNickname)
+
+	if err != nil {
+		panic(err)
+	}
+
+	return playerNickname.Response.Players[0].Personaname
+
+}
+
+func buildGetPlayerSummaryURL(steamID string) string {
+	fmt.Printf("M=buildGetPlayerSummaryURL SteamID=%s\n", steamID)
+	return playerSummaryURL + valveKey + steamIDParamKey + steamID
 }
 
 func buildGetUserURL(userName string) string {

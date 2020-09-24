@@ -10,12 +10,14 @@ import (
 )
 
 type UsersFollowed struct {
-	ID      int
-	SteamID string
+	ID           int
+	SteamID      string
+	OldNickname  string
+	CurrNickname string
 }
 
 // FollowSteamUser links a telegram user to a steam user which is being followed
-func FollowSteamUser(chatID int64, steamID string) int64 {
+func FollowSteamUser(chatID int64, steamID, currNickname string, userID int64) int64 {
 	// PROD
 	//db, err := sql.Open("mysql", "b4efd0d0f3c600:a5e2c7d6@tcp(us-cdbr-east-02.cleardb.com:3306)/heroku_bace7cf727a523d")
 	// LOCAL
@@ -25,13 +27,13 @@ func FollowSteamUser(chatID int64, steamID string) int64 {
 		panic(err.Error())
 	}
 
-	stmt, err := db.Prepare("INSERT INTO follow(chat_id, steam_id) VALUES(?, ?)")
+	stmt, err := db.Prepare("INSERT INTO follow(chat_id, steam_id, user_id, old_nickname, curr_nickname) VALUES(?, ?, ?, ?, ?)")
 
 	if err != nil {
 		panic(err.Error())
 	}
 
-	res, err := stmt.Exec(chatID, steamID)
+	res, err := stmt.Exec(chatID, steamID, userID, currNickname, currNickname)
 
 	defer stmt.Close()
 	if err != nil {
@@ -46,7 +48,7 @@ func FollowSteamUser(chatID int64, steamID string) int64 {
 	return lastID
 }
 
-//GetAllIncompletedFollowedUsers get all fallowed steam user for every telkegram user
+//GetAllIncompletedFollowedUsers get all fallowed steam user for every telegram user
 func GetAllIncompletedFollowedUsers() map[int64][]UsersFollowed {
 	// PROD
 	//db, err := sql.Open("mysql", "b4efd0d0f3c600:a5e2c7d6@tcp(us-cdbr-east-02.cleardb.com:3306)/heroku_bace7cf727a523d")
@@ -59,7 +61,7 @@ func GetAllIncompletedFollowedUsers() map[int64][]UsersFollowed {
 
 	defer db.Close()
 
-	rows, err := db.Query("SELECT id, chat_id, steam_id FROM follow WHERE is_completed <> true")
+	rows, err := db.Query("SELECT id, chat_id, steam_id, old_nickname, curr_nickname FROM follow WHERE is_completed <> true")
 
 	if err != nil {
 		log.Fatal(err)
@@ -69,12 +71,14 @@ func GetAllIncompletedFollowedUsers() map[int64][]UsersFollowed {
 	m := make(map[int64][]UsersFollowed)
 	for rows.Next() {
 		var (
-			id      int
-			chatID  int64
-			steamID string
+			id           int
+			chatID       int64
+			steamID      string
+			oldNickname  string
+			currNickName string
 		)
 
-		if err = rows.Scan(&id, &chatID, &steamID); err != nil {
+		if err = rows.Scan(&id, &chatID, &steamID, &oldNickname, &currNickName); err != nil {
 			if err != sql.ErrNoRows {
 				panic(err.Error())
 			}
@@ -82,7 +86,7 @@ func GetAllIncompletedFollowedUsers() map[int64][]UsersFollowed {
 			return nil
 		}
 
-		m[chatID] = append(m[chatID], UsersFollowed{ID: id, SteamID: steamID})
+		m[chatID] = append(m[chatID], UsersFollowed{ID: id, SteamID: steamID, OldNickname: oldNickname, CurrNickname: currNickName})
 	}
 
 	return m

@@ -40,7 +40,7 @@ func startTelegramBot() {
 		Endpoint: &tb.WebhookEndpoint{PublicURL: publicURL},
 	}
 
-	job.RunScheduler()
+	go job.RunScheduler()
 
 	service.SetUpBot(webhook, token)
 

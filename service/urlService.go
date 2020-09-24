@@ -6,12 +6,9 @@ import (
 	"strings"
 )
 
-const playerBanned = "This player is VAC banned!"
-const playerNotBanned = "This player is NOT VAC banned!"
-
 func getArgumentFromURL(url string) (string, error) {
 	splittedInput := strings.Split(url, "/")
-	if len(splittedInput) == 0 {
+	if len(splittedInput) < 2 {
 		return "", errors.New("Invalid URL")
 	}
 	return splittedInput[len(splittedInput)-1], nil
@@ -37,12 +34,4 @@ func getSteamID(url string) (string, error) {
 	log.Printf("M=getSteamID input=%v argument=%v\n", url, steamID)
 
 	return steamID, nil
-}
-
-func getResponse(isVACBanned bool) string {
-	if isVACBanned {
-		return playerBanned
-	}
-
-	return playerNotBanned
 }

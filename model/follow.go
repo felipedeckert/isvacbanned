@@ -14,6 +14,7 @@ type UsersFollowed struct {
 	SteamID      string
 	OldNickname  string
 	CurrNickname string
+	IsCompleted  bool
 }
 
 // FollowSteamUser links a telegram user to a steam user which is being followed
@@ -46,6 +47,29 @@ func FollowSteamUser(chatID int64, steamID, currNickname string, userID int64) i
 	}
 
 	return lastID
+}
+
+//GetFollowerCountBySteamID get the number of followers of a steam player
+func GetFollowerCountBySteamID(steamID string) (int64, error) {
+	// PROD
+	//db, err := sql.Open("mysql", "b4efd0d0f3c600:a5e2c7d6@tcp(us-cdbr-east-02.cleardb.com:3306)/heroku_bace7cf727a523d")
+	// LOCAL
+	db, err := sql.Open("mysql", "isvacbanned:root@tcp(localhost:3306)/isvacbanned")
+
+	if err != nil {
+		panic(err.Error())
+	}
+
+	row := db.QueryRow(
+		"SELECT COUNT(f.id) as count"+
+			"	FROM follow f "+
+			"	WHERE f.steam_id = ?", steamID)
+
+	var count int64
+
+	err = row.Scan(&count)
+
+	return count, err
 }
 
 //GetAllIncompletedFollowedUsers get all fallowed steam user for every telegram user
@@ -93,6 +117,48 @@ func GetAllIncompletedFollowedUsers() map[int64][]UsersFollowed {
 
 }
 
+//GetUsersFollowed gets a slice os the nicknames (the old ones) of players followed by a user
+func GetUsersFollowed(userID int64) []UsersFollowed {
+	// PROD
+	//db, err := sql.Open("mysql", "b4efd0d0f3c600:a5e2c7d6@tcp(us-cdbr-east-02.cleardb.com:3306)/heroku_bace7cf727a523d")
+	// LOCAL
+	db, err := sql.Open("mysql", "isvacbanned:root@tcp(localhost:3306)/isvacbanned")
+
+	if err != nil {
+		panic(err.Error())
+	}
+
+	defer db.Close()
+
+	rows, err := db.Query("SELECT old_nickname, is_completed FROM follow WHERE user_id = ?", userID)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+
+	s := make([]UsersFollowed, 0)
+	for rows.Next() {
+		var (
+			oldNickname string
+			isCompleted bool
+		)
+
+		if err = rows.Scan(&oldNickname, &isCompleted); err != nil {
+			if err != sql.ErrNoRows {
+				panic(err.Error())
+			}
+
+			return nil
+		}
+
+		s = append(s, UsersFollowed{OldNickname: oldNickname, IsCompleted: isCompleted})
+	}
+
+	return s
+}
+
+// SetFollowedUserToCompleted sets a player status to completed, and it will not be followed anymore
 func SetFollowedUserToCompleted(id []int) int64 {
 	// PROD
 	//db, err := sql.Open("mysql", "b4efd0d0f3c600:a5e2c7d6@tcp(us-cdbr-east-02.cleardb.com:3306)/heroku_bace7cf727a523d")
@@ -102,6 +168,8 @@ func SetFollowedUserToCompleted(id []int) int64 {
 	if err != nil {
 		panic(err.Error())
 	}
+
+	defer db.Close()
 
 	stmt, err := db.Prepare("UPDATE follow SET is_completed = true where id in(?)")
 
@@ -129,11 +197,10 @@ func sliceToStringParam(ids []int) string {
 		return ""
 	}
 
-	// Appr. 3 chars per num plus the comma.
-	estimate := len(ids) * 4
+	// Appr. 5 chars per num plus the comma.
+	estimate := len(ids) * 6
 	b := make([]byte, 0, estimate)
-	// Or simply
-	//   b := []byte{}
+
 	for _, n := range ids {
 		b = strconv.AppendInt(b, int64(n), 10)
 		b = append(b, ',')

@@ -37,6 +37,7 @@ func checkFollownUsers() {
 		}
 	}
 	if len(idsToUpdate) > 0 {
+		//Once a player status is set to completed, th9is player will not be returned in the GetAllIncompletedFollowedUsers query
 		model.SetFollowedUserToCompleted(idsToUpdate)
 	}
 }

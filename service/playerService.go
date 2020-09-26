@@ -70,7 +70,7 @@ func updatePlayersIfNeeded(players map[string]Player, spreadsheetID string) {
 }
 
 // UnmarshalPlayerByID returns a player and its data obtained from Steam API
-func unmarshalPlayerByID(jsonInput []byte) Player {
+func unmarshalPlayer(jsonInput []byte) Player {
 	player := Player{}
 
 	err := json.Unmarshal(jsonInput, &player)
@@ -81,15 +81,10 @@ func unmarshalPlayerByID(jsonInput []byte) Player {
 	return player
 }
 
-func unmarshalPlayerByName(customID string) string {
-	log.Printf("M=UnmarshalPlayerByName customID%v=", customID)
+func unmarshalSteamID(str []byte) string {
 	playerID := PlayerSteamID{}
-	str, err := getPlayerSteamID(customID)
-	if err != nil {
-		panic(err)
-	}
 
-	err = json.Unmarshal(str, &playerID)
+	err := json.Unmarshal(str, &playerID)
 
 	if err != nil {
 		panic(err)
@@ -102,13 +97,12 @@ func getAllPlayersStatus(userSteamID map[string]string) map[string]Player {
 	fmt.Println("M=getAllPlayersStatus")
 	players := make(map[string]Player)
 	for idx, value := range userSteamID {
-
 		players[idx] = GetPlayerStatus(value)
-		fmt.Println(value)
 	}
 	return players
 }
 
+// GetPlayerStatus receives a steamID and returns its player ban status
 func GetPlayerStatus(steamID string) Player {
 	url := buildGetURL(steamID)
 	log.Printf("M=getPlayerStatus url=%v\n", url)
@@ -124,17 +118,17 @@ func GetPlayerStatus(steamID string) Player {
 		log.Fatal(err)
 	}
 
-	return unmarshalPlayerByID(result)
+	return unmarshalPlayer(result)
 }
 
-func getPlayerSteamID(playerName string) ([]byte, error) {
+func getPlayerSteamID(playerName string) string {
 	url := buildGetUserURL(playerName)
 	log.Printf("M=getPlayerSteamID url=%v\n" + url)
 	resp, err := Client.Get(url)
 
 	if err != nil {
 		log.Printf("M=getPlayerSteamID err=%s\n", err)
-		return nil, err
+		log.Fatal(err)
 	}
 
 	result, err := ioutil.ReadAll(resp.Body)
@@ -143,7 +137,7 @@ func getPlayerSteamID(playerName string) ([]byte, error) {
 		log.Fatal(err)
 	}
 
-	return result, nil
+	return unmarshalSteamID(result)
 }
 
 // GetPlayerCurrentNickname gets the player identified by steamID current nickname

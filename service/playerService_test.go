@@ -2,7 +2,6 @@ package service
 
 import (
 	"bytes"
-	"encoding/json"
 	"io/ioutil"
 	"isvacbanned/mock"
 	"net/http"
@@ -17,7 +16,6 @@ func init() {
 
 func TestGetPlayerSteamID(t *testing.T) {
 	steamID := "12345678901234567"
-	success := 1
 
 	// build response JSON
 	myJSON := `{ "response": { "steamId":"12345678901234567",	"success": 1 } }`
@@ -32,19 +30,9 @@ func TestGetPlayerSteamID(t *testing.T) {
 	}
 
 	playerName := "fallen"
-	res, err := getPlayerSteamID(playerName)
+	res := getPlayerSteamID(playerName)
 
-	assert.Nil(t, err)
-
-	playerID := PlayerSteamID{}
-
-	err = json.Unmarshal(res, &playerID)
-
-	assert.Nil(t, err)
-
-	assert.EqualValues(t, steamID, playerID.Response.SteamId)
-
-	assert.EqualValues(t, success, playerID.Response.Success)
+	assert.EqualValues(t, steamID, res)
 }
 
 func TestGetPlayerCurrentNickname(t *testing.T) {
@@ -87,14 +75,13 @@ func TestGetPlayerStatus(t *testing.T) {
 
 	assert.EqualValues(t, expectedSteamID, res.Players[0].SteamId)
 	assert.EqualValues(t, expectedVACBanStatus, res.Players[0].VACBanned)
-
 }
 
 func TestGetAllPlayersStatus(t *testing.T) {
 	expectedSteamID := "12345678901234567"
 	expectedVACBanStatus := false
 
-	myJSON := `{ "players": [ { "SteamId": "12345678901234567", "CommunityBanned": false, "VACBanned": false, "NumberOfVACBans": 0, "DaysSinceLastBan": 0, "NumberOfGameBans": 0, "EconomyBan": "none" }	] }`
+	myJSON := `{ "players": [ { "SteamId": "12345678901234567", "CommunityBanned": false, "VACBanned": false, "NumberOfVACBans": 0, "DaysSinceLastBan": 0, "NumberOfGameBans": 0, "EconomyBan": "none" } ] }`
 
 	// create a new reader with that JSON
 	r := ioutil.NopCloser(bytes.NewReader([]byte(myJSON)))

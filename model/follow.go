@@ -158,6 +158,33 @@ func GetUsersFollowed(userID int64) []UsersFollowed {
 	return s
 }
 
+func SetCurrNickname(userId int, sanitizedActualNickname string) {
+	// PROD
+	//db, err := sql.Open("mysql", "b4efd0d0f3c600:a5e2c7d6@tcp(us-cdbr-east-02.cleardb.com:3306)/heroku_bace7cf727a523d")
+	// LOCAL
+	db, err := sql.Open("mysql", "isvacbanned:root@tcp(localhost:3306)/isvacbanned")
+
+	if err != nil {
+		panic(err.Error())
+	}
+
+	defer db.Close()
+
+	stmt, err := db.Prepare("UPDATE follow SET curr_nickname = ? where id = ?")
+
+	if err != nil {
+		panic(err.Error())
+	}
+
+	_, err = stmt.Exec(sanitizedActualNickname, userId)
+
+	defer stmt.Close()
+	if err != nil {
+		panic(err.Error())
+	}
+
+}
+
 // SetFollowedUserToCompleted sets a player status to completed, and it will not be followed anymore
 func SetFollowedUserToCompleted(id []int) int64 {
 	// PROD

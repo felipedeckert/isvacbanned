@@ -20,7 +20,7 @@ func getSteamID(url string) (string, error) {
 	var customID string
 	if strings.Contains(url, "id") {
 		customID, err = getArgumentFromURL(url)
-		steamID = unmarshalPlayerByName(customID)
+		steamID = getPlayerSteamID(customID)
 	} else if strings.Contains(url, "profile") {
 		steamID, err = getArgumentFromURL(url)
 	}

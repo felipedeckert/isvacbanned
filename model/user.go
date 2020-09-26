@@ -2,8 +2,10 @@ package model
 
 import "database/sql"
 
+type UserModel struct{}
+
 // GetUserID returns database user id for a telegram user id
-func GetUserID(telegramID int) (int64, error) {
+func (u UserModel) GetUserID(telegramID int) (int64, error) {
 	// PROD
 	//db, err := sql.Open("mysql", "b4efd0d0f3c600:a5e2c7d6@tcp(us-cdbr-east-02.cleardb.com:3306)/heroku_bace7cf727a523d")
 	// LOCAL
@@ -25,7 +27,7 @@ func GetUserID(telegramID int) (int64, error) {
 }
 
 // CreateUser inserts a new user in the database
-func CreateUser(firstName, username string, telegramID int) int64 {
+func (u UserModel) CreateUser(firstName, username string, telegramID int) int64 {
 	// PROD
 	//db, err := sql.Open("mysql", "b4efd0d0f3c600:a5e2c7d6@tcp(us-cdbr-east-02.cleardb.com:3306)/heroku_bace7cf727a523d")
 	// LOCAL

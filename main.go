@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"isvacbanned/job"
 	"isvacbanned/service"
 	"log"
@@ -12,12 +13,16 @@ import (
 func main() {
 
 	//Receives a google drive spreadsheet ID as argument and updates vac ban status
-	//sheetID := os.Args[1]
-	//fmt.Printf("M=main spreadsheetID=%v step=2 \n", sheetID)
-	//service.UpdatePlayersStatus(sheetID)
+	//*
+	sheetID := os.Args[1]
+	fmt.Printf("M=main spreadsheetID=%v step=2 \n", sheetID)
+	service.UpdatePlayersStatus(sheetID)
+	//*/
 
-	startTelegramBot()
-	go job.RunScheduler()
+	/*
+		startTelegramBot()
+		job.RunScheduler()
+	*/
 
 }
 

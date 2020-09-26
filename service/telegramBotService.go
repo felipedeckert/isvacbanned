@@ -39,14 +39,14 @@ func setUpBotHandlers(bot *tb.Bot) {
 }
 
 func verifyHandler(m *tb.Message, bot *tb.Bot) {
-	argument, err := getSteamID(m.Payload)
+	steamID, err := getSteamID(m.Payload)
 
-	if err != nil || len(argument) != steamIDLength {
+	if err != nil || len(steamID) != steamIDLength {
 		bot.Send(m.Sender, "Invalid Param!")
 		return
 	}
 
-	player := UnmarshalPlayerByID(argument)
+	player := GetPlayerStatus(steamID)
 
 	if len(player.Players) == 0 {
 		bot.Send(m.Sender, "Player not found!")
@@ -55,7 +55,7 @@ func verifyHandler(m *tb.Message, bot *tb.Bot) {
 
 	isVACBanned := player.Players[0].VACBanned
 
-	fmt.Printf("M=verifyHandler player=%v isVACBanned=%v\n", argument, isVACBanned)
+	fmt.Printf("M=verifyHandler player=%v isVACBanned=%v\n", steamID, isVACBanned)
 
 	message := getBanResponse(isVACBanned)
 

@@ -1,7 +1,6 @@
 package service
 
 import (
-	"bufio"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -78,23 +77,16 @@ func saveToken(path string, token *oauth2.Token) {
 
 //GetSteamIDs return a map of row ID and steam ID of a giver spreadsheet
 func GetSteamIDs(spreadsheetID string) map[string]string {
-	fmt.Printf("M=GetSteamIDs step=START spreadsheetID=%v Aperte Enter para continuar!\n", spreadsheetID)
-	reader := bufio.NewReader(os.Stdin)
-	//reader.ReadString('\n')
+	fmt.Printf("M=GetSteamIDs step=START spreadsheetID=%v\n", spreadsheetID)
+
 	srv := authenticate()
 
 	readRange := "Cheaters!A2:D"
-	fmt.Printf("M=GetSteamIDs spreadSheetID=%v step=1 Aperte Enter para continuar!\n", spreadsheetID)
-	reader.ReadString('\n')
+	fmt.Printf("M=GetSteamIDs spreadSheetID=%v\n", spreadsheetID)
 	resp, err := srv.Spreadsheets.Values.Get(spreadsheetID, readRange).Do()
 	if err != nil {
-		fmt.Println("M=GetSteamIDs step=2 Aperte Enter para continuar!")
-		reader.ReadString('\n')
 		fmt.Printf("Unable to retrieve data from sheet: %v\n", err)
 	}
-
-	fmt.Println("M=GetSteamIDs step=3 Aperte Enter para continuar!")
-	reader.ReadString('\n')
 
 	if len(resp.Values) == 0 {
 		fmt.Println("No data found.")
@@ -108,16 +100,12 @@ func GetSteamIDs(spreadsheetID string) map[string]string {
 		fmt.Printf("%v \n", row[3])
 		result[row[0].(string)] = row[3].(string)
 	}
-	fmt.Println("M=GetSteamIDs step=END Aperte Enter para continuar!")
-	reader.ReadString('\n')
 	return result
 }
 
 //UpdateVACBanStatus sets the vac ban status to YES, updates daysSinceLastBan and update date
 func UpdateVACBanStatus(rowID string, daysSinceLastBan int, spreadsheetID string) {
-	fmt.Println("M=UpdateVACBanStatus step=START Aperte Enter para continuar!")
-	//reader := bufio.NewReader(os.Stdin)
-	//reader.ReadString('\n')
+	fmt.Println("M=UpdateVACBanStatus step=START")
 	srv := authenticate()
 
 	var vr sheets.ValueRange
@@ -132,15 +120,11 @@ func UpdateVACBanStatus(rowID string, daysSinceLastBan int, spreadsheetID string
 	if err != nil {
 		fmt.Printf("Unable to retrieve data from sheet: %v\n", err)
 	}
-	fmt.Println("M=UpdateVACBanStatus step=START Aperte Enter para continuar!")
-	//reader.ReadString('\n')
-
+	fmt.Println("M=UpdateVACBanStatus step=END")
 }
 
 func authenticate() *sheets.Service {
-	fmt.Println("M=authenticate step=START Aperte Enter para continuar!")
-	//reader := bufio.NewReader(os.Stdin)
-	//reader.ReadString('\n')
+	fmt.Println("M=authenticate step=START")
 	b, err := ioutil.ReadFile("credentials.json")
 	if err != nil {
 		fmt.Printf("Unable to read client secret file: %v\n", err)
@@ -158,7 +142,6 @@ func authenticate() *sheets.Service {
 		fmt.Printf("Unable to retrieve Sheets client: %v\n", err)
 	}
 
-	fmt.Println("M=authenticate step=END Aperte Enter para continuar!")
-	//reader.ReadString('\n')
+	fmt.Println("M=authenticate step=END")
 	return srv
 }

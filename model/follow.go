@@ -9,6 +9,8 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
+type FollowModel struct{}
+
 type UsersFollowed struct {
 	ID           int
 	SteamID      string
@@ -18,7 +20,7 @@ type UsersFollowed struct {
 }
 
 // FollowSteamUser links a telegram user to a steam user which is being followed
-func FollowSteamUser(chatID int64, steamID, currNickname string, userID int64) int64 {
+func (f *FollowModel) FollowSteamUser(chatID int64, steamID, currNickname string, userID int64) int64 {
 	// PROD
 	//db, err := sql.Open("mysql", "b4efd0d0f3c600:a5e2c7d6@tcp(us-cdbr-east-02.cleardb.com:3306)/heroku_bace7cf727a523d")
 	// LOCAL
@@ -50,7 +52,7 @@ func FollowSteamUser(chatID int64, steamID, currNickname string, userID int64) i
 }
 
 //GetFollowerCountBySteamID get the number of followers of a steam player
-func GetFollowerCountBySteamID(steamID string) (int64, error) {
+func (f *FollowModel) GetFollowerCountBySteamID(steamID string) (int64, error) {
 	// PROD
 	//db, err := sql.Open("mysql", "b4efd0d0f3c600:a5e2c7d6@tcp(us-cdbr-east-02.cleardb.com:3306)/heroku_bace7cf727a523d")
 	// LOCAL
@@ -73,7 +75,7 @@ func GetFollowerCountBySteamID(steamID string) (int64, error) {
 }
 
 //GetAllIncompletedFollowedUsers get all fallowed steam user for every telegram user
-func GetAllIncompletedFollowedUsers() map[int64][]UsersFollowed {
+func (f *FollowModel) GetAllIncompletedFollowedUsers() map[int64][]UsersFollowed {
 	// PROD
 	//db, err := sql.Open("mysql", "b4efd0d0f3c600:a5e2c7d6@tcp(us-cdbr-east-02.cleardb.com:3306)/heroku_bace7cf727a523d")
 	// LOCAL
@@ -118,7 +120,7 @@ func GetAllIncompletedFollowedUsers() map[int64][]UsersFollowed {
 }
 
 //GetUsersFollowed gets a slice os the nicknames (the old ones) of players followed by a user
-func GetUsersFollowed(userID int64) []UsersFollowed {
+func (f *FollowModel) GetUsersFollowed(userID int64) []UsersFollowed {
 	// PROD
 	//db, err := sql.Open("mysql", "b4efd0d0f3c600:a5e2c7d6@tcp(us-cdbr-east-02.cleardb.com:3306)/heroku_bace7cf727a523d")
 	// LOCAL
@@ -158,7 +160,7 @@ func GetUsersFollowed(userID int64) []UsersFollowed {
 	return s
 }
 
-func SetCurrNickname(userId int, sanitizedActualNickname string) {
+func (f *FollowModel) SetCurrNickname(userId int, sanitizedActualNickname string) {
 	// PROD
 	//db, err := sql.Open("mysql", "b4efd0d0f3c600:a5e2c7d6@tcp(us-cdbr-east-02.cleardb.com:3306)/heroku_bace7cf727a523d")
 	// LOCAL
@@ -186,7 +188,7 @@ func SetCurrNickname(userId int, sanitizedActualNickname string) {
 }
 
 // SetFollowedUserToCompleted sets a player status to completed, and it will not be followed anymore
-func SetFollowedUserToCompleted(id []int) int64 {
+func (f *FollowModel) SetFollowedUserToCompleted(id []int) int64 {
 	// PROD
 	//db, err := sql.Open("mysql", "b4efd0d0f3c600:a5e2c7d6@tcp(us-cdbr-east-02.cleardb.com:3306)/heroku_bace7cf727a523d")
 	// LOCAL

@@ -11,6 +11,12 @@ const steamIDLength = 17
 const playerBanned = "This player is VAC banned!"
 const playerNotBanned = "This player is NOT VAC banned!"
 
+var followHandler *handler.FollowHandler
+
+func init() {
+	followHandler = &handler.FollowHandler{}
+}
+
 // SetUpBot sets up the bot configs and its handlers
 func SetUpBot(webhook *tb.Webhook, token string) {
 	pref := tb.Settings{
@@ -34,7 +40,7 @@ func setUpBotHandlers(bot *tb.Bot) {
 	bot.Handle("/show", func(m *tb.Message) { setUpShowHandler(m, bot) })
 }
 
-func setUpFollowHandler(m *tb.Message, bot *tb.Bot) {
+func setUpFollowHandler(m *tb.Message, bot *tb.Bot) int64 {
 	userID := getUserID(m.Sender)
 	steamID, err := getSteamID(m.Payload)
 
@@ -42,12 +48,12 @@ func setUpFollowHandler(m *tb.Message, bot *tb.Bot) {
 
 	if err != nil || len(steamID) != steamIDLength {
 		bot.Send(m.Sender, "Invalid Param!")
-		return
+		return -1
 	}
 
 	currNickname := GetPlayerCurrentNickname(steamID)
 
-	handler.FollowHandler(m, bot, steamID, currNickname, userID)
+	return followHandler.FollowHandler(m, bot, steamID, currNickname, userID)
 }
 
 func setUpShowHandler(m *tb.Message, bot *tb.Bot) {

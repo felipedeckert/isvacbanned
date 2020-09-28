@@ -18,6 +18,12 @@ const telegramMethod = "/sendMessage"
 const telegramChatIDParam = "?chat_id="
 const telegramTextParam = "&text="
 
+var followModelClient FollowModelClient
+
+func init() {
+	followModelClient = &model.FollowModel{}
+}
+
 // RunScheduler sets up the scheduler to check users status
 func RunScheduler() {
 	fmt.Println("RunScheduler")
@@ -30,7 +36,7 @@ func RunScheduler() {
 
 func checkFollownUsers() {
 	fmt.Println("checkFollownUsers")
-	usersIncompleted := model.GetAllIncompletedFollowedUsers()
+	usersIncompleted := followModelClient.GetAllIncompletedFollowedUsers()
 	var usersToComplete []int
 	for chatID, steamIDList := range usersIncompleted {
 		for _, users := range steamIDList {
@@ -39,7 +45,7 @@ func checkFollownUsers() {
 	}
 	if len(usersToComplete) > 0 {
 		//Once a player status is set to completed, this player will not be returned in the GetAllIncompletedFollowedUsers query
-		model.SetFollowedUserToCompleted(usersToComplete)
+		followModelClient.SetFollowedUserToCompleted(usersToComplete)
 	}
 }
 
@@ -56,7 +62,7 @@ func handleFollowedUser(user model.UsersFollowed, chatID int64) []int {
 		sendMessageToUser(buildBanMessage(user.OldNickname, actualNickname, user.SteamID, playerData.DaysSinceLastBan), chatID)
 		idsToUpdate = append(idsToUpdate, user.ID)
 	} else if user.CurrNickname != sanitizedActualNickname {
-		model.SetCurrNickname(user.ID, sanitizedActualNickname)
+		followModelClient.SetCurrNickname(user.ID, sanitizedActualNickname)
 		sendMessageToUser(buildNicknameChangedMessage(user.OldNickname, actualNickname, user.SteamID), chatID)
 	}
 	return idsToUpdate

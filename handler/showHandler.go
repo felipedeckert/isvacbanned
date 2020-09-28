@@ -7,8 +7,15 @@ import (
 	tb "gopkg.in/tucnak/telebot.v2"
 )
 
+var followClient FollowModelClient
+
+func init() {
+	followClient = &model.FollowModel{}
+}
+
+//ShowHandler handles show requests
 func ShowHandler(m *tb.Message, bot *tb.Bot, userID int64) {
-	followedUsers := model.GetUsersFollowed(userID)
+	followedUsers := followClient.GetUsersFollowed(userID)
 
 	message := getShowResponse(followedUsers)
 

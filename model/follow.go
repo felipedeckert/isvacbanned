@@ -51,6 +51,38 @@ func (f *FollowModel) FollowSteamUser(chatID int64, steamID, currNickname string
 	return lastID
 }
 
+// FollowSteamUser links a telegram user to a steam user which is being followed
+func (f *FollowModel) UnfollowSteamUser(steamID string) int64 {
+	// PROD
+	//db, err := sql.Open("mysql", "b4efd0d0f3c600:a5e2c7d6@tcp(us-cdbr-east-02.cleardb.com:3306)/heroku_bace7cf727a523d")
+	// LOCAL
+	db, err := sql.Open("mysql", "isvacbanned:root@tcp(localhost:3306)/isvacbanned")
+
+	if err != nil {
+		panic(err.Error())
+	}
+
+	stmt, err := db.Prepare("UPDATE follow SET is_active = false where steam_id = ?")
+
+	if err != nil {
+		panic(err.Error())
+	}
+
+	res, err := stmt.Exec(steamID)
+
+	defer stmt.Close()
+	if err != nil {
+		panic(err.Error())
+	}
+
+	rows, err := res.RowsAffected()
+	if err != nil {
+		panic(err.Error())
+	}
+
+	return rows
+}
+
 //GetFollowerCountBySteamID get the number of followers of a steam player
 func (f *FollowModel) GetFollowerCountBySteamID(steamID string) (int64, error) {
 	// PROD
@@ -87,7 +119,7 @@ func (f *FollowModel) GetAllIncompletedFollowedUsers() map[int64][]UsersFollowed
 
 	defer db.Close()
 
-	rows, err := db.Query("SELECT id, chat_id, steam_id, old_nickname, curr_nickname FROM follow WHERE is_completed <> true")
+	rows, err := db.Query("SELECT id, chat_id, steam_id, old_nickname, curr_nickname FROM follow WHERE is_completed <> true AND is_active = true")
 
 	if err != nil {
 		log.Fatal(err)

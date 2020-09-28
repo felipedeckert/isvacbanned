@@ -4,6 +4,7 @@ package mock
 type UserModelClient struct {
 	GetGetUserIDFunc  func(telegramID int) (int64, error)
 	GetCreateUserFunc func(firstName, username string, telegramID int) int64
+	GetInactivateUser func(userID int64) int64
 }
 
 //GetUserID is the mock client's `GetUserID` func
@@ -16,7 +17,13 @@ func (m *UserModelClient) CreateUser(firstName, username string, telegramID int)
 	return GetCreateUserFunc(firstName, username, telegramID)
 }
 
+//CreateUser is the mock client's `CreateUser` func
+func (m *UserModelClient) InactivateUser(userID int64) int64 {
+	return GetInactivateUser(userID)
+}
+
 var (
 	GetGetUserIDFunc  func(telegramID int) (int64, error)
 	GetCreateUserFunc func(firstName, username string, telegramID int) int64
+	GetInactivateUser func(userID int64) int64
 )

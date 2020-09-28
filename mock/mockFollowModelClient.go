@@ -5,6 +5,7 @@ import "isvacbanned/model"
 //FollowModelClient is the mock client
 type FollowModelClient struct {
 	GetFollowSteamUser                func(chatID int64, steamID, currNickname string, userID int64) int64
+	GetUnfollowSteamUser			  func(steamID string) int64
 	GetGetFollowerCountBySteamID      func(steamID string) (int64, error)
 	GetGetAllIncompletedFollowedUsers func() map[int64][]model.UsersFollowed
 	GetGetUsersFollowed               func(userID int64) []model.UsersFollowed
@@ -14,6 +15,10 @@ type FollowModelClient struct {
 
 func (f *FollowModelClient) FollowSteamUser(chatID int64, steamID, currNickname string, userID int64) int64 {
 	return GetFollowSteamUser(chatID, steamID, currNickname, userID)
+}
+
+func (f *FollowModelClient) UnfollowSteamUser(steamID string) int64 {
+	return GetUnfollowSteamUser(steamID)
 }
 
 func (f *FollowModelClient) GetFollowerCountBySteamID(steamID string) (int64, error) {
@@ -38,6 +43,7 @@ func (f *FollowModelClient) SetFollowedUserToCompleted(id []int) int64 {
 
 var (
 	GetFollowSteamUser                func(chatID int64, steamID, currNickname string, userID int64) int64
+	GetUnfollowSteamUser			  func(steamID string) int64
 	GetGetFollowerCountBySteamID      func(steamID string) (int64, error)
 	GetGetAllIncompletedFollowedUsers func() map[int64][]model.UsersFollowed
 	GetGetUsersFollowed               func(userID int64) []model.UsersFollowed

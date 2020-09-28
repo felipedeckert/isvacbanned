@@ -7,7 +7,7 @@ import (
 	tb "gopkg.in/tucnak/telebot.v2"
 )
 
-var followClient FollowModelClient
+var followClient model.FollowModelClient
 
 func init() {
 	followClient = &model.FollowModel{}

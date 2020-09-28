@@ -53,3 +53,69 @@ func (u UserModel) CreateUser(firstName, username string, telegramID int) int64 
 
 	return lastID
 }
+
+func (u UserModel) InactivateUser(userID int64) int64 {
+	// PROD
+	//db, err := sql.Open("mysql", "b4efd0d0f3c600:a5e2c7d6@tcp(us-cdbr-east-02.cleardb.com:3306)/heroku_bace7cf727a523d")
+	// LOCAL
+	db, err := sql.Open("mysql", "isvacbanned:root@tcp(localhost:3306)/isvacbanned")
+
+	if err != nil {
+		panic(err.Error())
+	}
+
+	defer db.Close()
+
+	stmt, err := db.Prepare("UPDATE user SET is_active = false WHERE id = ?")
+
+	if err != nil {
+		panic(err.Error())
+	}
+
+	res, err := stmt.Exec(userID)
+
+	defer stmt.Close()
+	if err != nil {
+		panic(err.Error())
+	}
+
+	rows, err := res.LastInsertId()
+	if err != nil {
+		panic(err.Error())
+	}
+
+	return rows
+}
+
+func (u UserModel) ActivateUser(userID int64) int64 {
+	// PROD
+	//db, err := sql.Open("mysql", "b4efd0d0f3c600:a5e2c7d6@tcp(us-cdbr-east-02.cleardb.com:3306)/heroku_bace7cf727a523d")
+	// LOCAL
+	db, err := sql.Open("mysql", "isvacbanned:root@tcp(localhost:3306)/isvacbanned")
+
+	if err != nil {
+		panic(err.Error())
+	}
+
+	defer db.Close()
+
+	stmt, err := db.Prepare("UPDATE user SET is_active = true WHERE id = ?")
+
+	if err != nil {
+		panic(err.Error())
+	}
+
+	res, err := stmt.Exec(userID)
+
+	defer stmt.Close()
+	if err != nil {
+		panic(err.Error())
+	}
+
+	rows, err := res.LastInsertId()
+	if err != nil {
+		panic(err.Error())
+	}
+
+	return rows
+}

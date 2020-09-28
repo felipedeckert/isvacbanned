@@ -2,9 +2,9 @@ package job
 
 import (
 	"fmt"
-	"isvacbanned/handler"
 	"isvacbanned/model"
 	"isvacbanned/service"
+	"isvacbanned/util"
 	"net/http"
 	"strconv"
 	"time"
@@ -12,13 +12,12 @@ import (
 	"github.com/go-co-op/gocron"
 )
 
-const steamProfileURL = "https://steamcommunity.com/profiles/"
 const telegramAPIURL = "https://api.telegram.org/bot"
 const telegramMethod = "/sendMessage"
 const telegramChatIDParam = "?chat_id="
 const telegramTextParam = "&text="
 
-var followModelClient FollowModelClient
+var followModelClient *model.FollowModel
 
 func init() {
 	followModelClient = &model.FollowModel{}
@@ -56,7 +55,7 @@ func handleFollowedUser(user model.UsersFollowed, chatID int64) []int {
 
 	actualNickname := service.GetPlayerCurrentNickname(user.SteamID)
 
-	sanitizedActualNickname := handler.SanitizeString(actualNickname)
+	sanitizedActualNickname := util.SanitizeString(actualNickname)
 
 	if playerData.VACBanned {
 		sendMessageToUser(buildBanMessage(user.OldNickname, actualNickname, user.SteamID, playerData.DaysSinceLastBan), chatID)
@@ -82,14 +81,14 @@ func sendMessageToUser(message string, chatID int64) {
 }
 
 func buildNicknameChangedMessage(oldNickname, currNickname, steamID string) string {
-	return "The user you followed as " + oldNickname + " Steam Profile: " + steamProfileURL + steamID + " is now under the nickname " + currNickname
+	return "The user you followed as " + oldNickname + " Steam Profile: " + util.SteamProfileURL + steamID + " is now under the nickname " + currNickname
 }
 
 func buildBanMessage(oldNickname, currNickname, steamID string, daysSinceLastBan int) string {
-	// if the player hanst changed nickname no reason to return redundant message
+	// if the player hasn't changed nickname no reason to return redundant message
 	changedNickPhrase := ""
-	if oldNickname != handler.SanitizeString(currNickname) {
+	if oldNickname != util.SanitizeString(currNickname) {
 		changedNickPhrase = ", now under the nickname " + currNickname
 	}
-	return "The user you followed as " + oldNickname + changedNickPhrase + ", Steam Profile: " + steamProfileURL + steamID + ", has been BANNED " + strconv.Itoa(daysSinceLastBan) + " days ago! You won't be notified about this player anymore."
+	return "The user you followed as " + oldNickname + changedNickPhrase + ", Steam Profile: " + util.SteamProfileURL + steamID + ", has been BANNED " + strconv.Itoa(daysSinceLastBan) + " days ago! You won't be notified about this player anymore."
 }

@@ -12,6 +12,21 @@
 			"Rev": "358a5368da64cf4868551652e852ceb453504f64"
 		},
 		{
+			"ImportPath": "github.com/davecgh/go-spew/spew",
+			"Comment": "v1.1.1-1-gd8f796a",
+			"Rev": "d8f796af33cc11cb798c1aaeb27a4ebc5099927d"
+		},
+		{
+			"ImportPath": "github.com/go-co-op/gocron",
+			"Comment": "v0.3.1",
+			"Rev": "04be48f61037ca7e035c0f17f4547c3b0ba93a0e"
+		},
+		{
+			"ImportPath": "github.com/go-sql-driver/mysql",
+			"Comment": "v1.5.0-25-g46351a8",
+			"Rev": "46351a8892976898935f653f5333782579a96fa5"
+		},
+		{
 			"ImportPath": "github.com/golang/groupcache/lru",
 			"Rev": "8c9f03a8e57eb486e42badaed3fb287da51807ba"
 		},
@@ -49,6 +64,16 @@
 			"ImportPath": "github.com/pkg/errors",
 			"Comment": "v0.9.1",
 			"Rev": "614d223910a179a466c1767a985424175c39b465"
+		},
+		{
+			"ImportPath": "github.com/pmezard/go-difflib/difflib",
+			"Comment": "v1.0.0-4-g5d4384e",
+			"Rev": "5d4384ee4fb2527b0a1256a821ebfc92f91efefc"
+		},
+		{
+			"ImportPath": "github.com/stretchr/testify/assert",
+			"Comment": "v1.6.1-29-g54d05a4",
+			"Rev": "54d05a4e18440fb0a44989ab910f347eac4a131f"
 		},
 		{
 			"ImportPath": "go.opencensus.io",
@@ -618,6 +643,11 @@
 			"ImportPath": "gopkg.in/tucnak/telebot.v2",
 			"Comment": "v2.3.4",
 			"Rev": "c2cb2be62313ead3050ced5184fb086438106920"
+		},
+		{
+			"ImportPath": "gopkg.in/yaml.v3",
+			"Comment": "v2.2.1-80-geeeca48",
+			"Rev": "eeeca48fe7764f320e4870d231902bf9c1be2c08"
 		}
 	]
 }

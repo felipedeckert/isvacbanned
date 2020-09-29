@@ -2,10 +2,12 @@ package handler
 
 import (
 	"fmt"
-	tb "gopkg.in/tucnak/telebot.v2"
 	"isvacbanned/messager"
 	"isvacbanned/model"
 	"isvacbanned/util"
+	"log"
+
+	tb "gopkg.in/tucnak/telebot.v2"
 )
 
 type FollowHandler struct{}
@@ -23,6 +25,7 @@ func init() {
 
 //FollowHandler handles a follow request
 func (f *FollowHandler) FollowHandler(m *tb.Message, bot *tb.Bot, steamID, currNickname string, userID int64) int64 {
+	log.Printf("M=FollowHandler steamID=%v\n", steamID)
 	followersCount, err := FollowClient.GetFollowerCountBySteamID(steamID)
 
 	UserModelClient.ActivateUser(userID)
@@ -42,7 +45,6 @@ func (f *FollowHandler) FollowHandler(m *tb.Message, bot *tb.Bot, steamID, currN
 }
 
 func getFollowResponse(currNickname string, followersCount int64) string {
-
 	message := fmt.Sprintf("Following player %v, ", currNickname)
 
 	if followersCount > 0 {

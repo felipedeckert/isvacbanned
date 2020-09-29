@@ -44,6 +44,8 @@ func setUpBotHandlers(bot *tb.Bot) {
 	bot.Handle("/unfollow", func(m *tb.Message) { setUpUnfollowHandler(m, bot) })
 
 	bot.Handle("/stop", func(m *tb.Message) { setUpStopHandler(m, bot) })
+
+	bot.Handle("/start", func(m *tb.Message) { setUpStartHandler(m, bot) })
 }
 
 func setUpFollowHandler(m *tb.Message, bot *tb.Bot) int64 {
@@ -72,6 +74,10 @@ func setUpStopHandler(m *tb.Message, bot *tb.Bot) {
 	userID := getUserID(m.Sender)
 
 	handler.StopHandler(m, bot, userID)
+}
+
+func setUpStartHandler(m *tb.Message, bot *tb.Bot) {
+	handler.StartHandler(m, bot)
 }
 
 func setUpUnfollowHandler(m *tb.Message, bot *tb.Bot) {

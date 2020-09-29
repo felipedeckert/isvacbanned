@@ -1,11 +1,12 @@
 package job
 
 import (
-	"fmt"
 	"isvacbanned/model"
 	"isvacbanned/service"
 	"isvacbanned/util"
+	"log"
 	"net/http"
+	"os"
 	"strconv"
 	"time"
 
@@ -25,7 +26,7 @@ func init() {
 
 // RunScheduler sets up the scheduler to check users status
 func RunScheduler() {
-	fmt.Println("RunScheduler")
+	log.Printf("M=RunScheduler\n")
 	scheduler := gocron.NewScheduler(time.UTC)
 
 	scheduler.Every(30).Seconds().Do(checkFollownUsers)
@@ -34,7 +35,6 @@ func RunScheduler() {
 }
 
 func checkFollownUsers() {
-	fmt.Println("checkFollownUsers")
 	usersIncompleted := followModelClient.GetAllIncompletedFollowedUsers()
 	var usersToComplete []int
 	for chatID, steamIDList := range usersIncompleted {
@@ -46,6 +46,8 @@ func checkFollownUsers() {
 		//Once a player status is set to completed, this player will not be returned in the GetAllIncompletedFollowedUsers query
 		followModelClient.SetFollowedUserToCompleted(usersToComplete)
 	}
+
+	log.Printf("M=checkFollownUsers usersToCompleteCount=%v\n", len(usersToComplete))
 }
 
 func handleFollowedUser(user model.UsersFollowed, chatID int64) []int {
@@ -58,9 +60,11 @@ func handleFollowedUser(user model.UsersFollowed, chatID int64) []int {
 	sanitizedActualNickname := util.SanitizeString(actualNickname)
 
 	if playerData.VACBanned {
+		log.Printf("M=handleFollowedUser steamID=%v status=banned\n", user.SteamID)
 		sendMessageToUser(buildBanMessage(user.OldNickname, actualNickname, user.SteamID, playerData.DaysSinceLastBan), chatID)
 		idsToUpdate = append(idsToUpdate, user.ID)
 	} else if user.CurrNickname != sanitizedActualNickname {
+		log.Printf("M=handleFollowedUser steamID=%v status=changedNickname\n", user.SteamID)
 		followModelClient.SetCurrNickname(user.ID, sanitizedActualNickname)
 		sendMessageToUser(buildNicknameChangedMessage(user.OldNickname, actualNickname, user.SteamID), chatID)
 	}
@@ -68,16 +72,19 @@ func handleFollowedUser(user model.UsersFollowed, chatID int64) []int {
 }
 
 func sendMessageToUser(message string, chatID int64) {
-	token := "1324910657:AAFSlJn6TD9EeYNn35MEo-YphYlhYhqc_do"
-	//token := os.Getenv("TOKEN")
+	var token string
+
+	if util.LOCAL {
+		token = "1324910657:AAFSlJn6TD9EeYNn35MEo-YphYlhYhqc_do"
+	} else {
+		token = os.Getenv("TOKEN")
+	}
 
 	sendMessageURL := telegramAPIURL + token + telegramMethod + telegramChatIDParam + strconv.FormatInt(chatID, 10) + telegramTextParam + message
-	res, err := http.Get(sendMessageURL)
+	_, err := http.Get(sendMessageURL)
 	if err != nil {
 		panic(err)
 	}
-
-	fmt.Println(res)
 }
 
 func buildNicknameChangedMessage(oldNickname, currNickname, steamID string) string {

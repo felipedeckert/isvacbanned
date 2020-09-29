@@ -55,7 +55,7 @@ func getTokenFromWeb(config *oauth2.Config) *oauth2.Token {
 func tokenFromFile(file string) (*oauth2.Token, error) {
 	f, err := os.Open(file)
 	if err != nil {
-		fmt.Println("M=tokenFromFile err=" + err.Error())
+		log.Printf("M=tokenFromFile err=" + err.Error())
 		return nil, err
 	}
 	defer f.Close()
@@ -89,11 +89,11 @@ func GetSteamIDs(spreadsheetID string) map[string]string {
 	}
 
 	if len(resp.Values) == 0 {
-		fmt.Println("No data found.")
+		log.Printf("No data found.")
 		return nil
 	}
 
-	fmt.Println("SteamID:")
+	log.Printf("SteamID:")
 	result := make(map[string]string)
 	for _, row := range resp.Values {
 		fmt.Printf("%v \n", row[0])
@@ -105,7 +105,7 @@ func GetSteamIDs(spreadsheetID string) map[string]string {
 
 //UpdateVACBanStatus sets the vac ban status to YES, updates daysSinceLastBan and update date
 func UpdateVACBanStatus(rowID string, daysSinceLastBan int, spreadsheetID string) {
-	fmt.Println("M=UpdateVACBanStatus step=START")
+	log.Printf("M=UpdateVACBanStatus step=START")
 	srv := authenticate()
 
 	var vr sheets.ValueRange
@@ -120,11 +120,11 @@ func UpdateVACBanStatus(rowID string, daysSinceLastBan int, spreadsheetID string
 	if err != nil {
 		fmt.Printf("Unable to retrieve data from sheet: %v\n", err)
 	}
-	fmt.Println("M=UpdateVACBanStatus step=END")
+	log.Printf("M=UpdateVACBanStatus step=END")
 }
 
 func authenticate() *sheets.Service {
-	fmt.Println("M=authenticate step=START")
+	log.Printf("M=authenticate step=START")
 	b, err := ioutil.ReadFile("credentials.json")
 	if err != nil {
 		fmt.Printf("Unable to read client secret file: %v\n", err)
@@ -142,6 +142,6 @@ func authenticate() *sheets.Service {
 		fmt.Printf("Unable to retrieve Sheets client: %v\n", err)
 	}
 
-	fmt.Println("M=authenticate step=END")
+	log.Printf("M=authenticate step=END")
 	return srv
 }

@@ -59,11 +59,11 @@ func init() {
 }
 
 func updatePlayersIfNeeded(players map[string]Player, spreadsheetID string) {
-	fmt.Println("M=updatePlayersIfNeeded")
+	log.Printf("M=updatePlayersIfNeeded")
 	for idx, p := range players {
 		data := p.Players[0]
 		if data.VACBanned {
-			fmt.Println("M=updatePlayersIfNeeded VAC " + data.SteamId)
+			log.Printf("M=updatePlayersIfNeeded VAC " + data.SteamId)
 			UpdateVACBanStatus(idx, data.DaysSinceLastBan, spreadsheetID)
 		}
 	}
@@ -94,7 +94,7 @@ func unmarshalSteamID(str []byte) string {
 }
 
 func getAllPlayersStatus(userSteamID map[string]string) map[string]Player {
-	fmt.Println("M=getAllPlayersStatus")
+	log.Printf("M=getAllPlayersStatus")
 	players := make(map[string]Player)
 	for idx, value := range userSteamID {
 		players[idx] = GetPlayerStatus(value)
@@ -123,7 +123,7 @@ func GetPlayerStatus(steamID string) Player {
 
 func getPlayerSteamID(playerName string) string {
 	url := buildGetUserURL(playerName)
-	log.Printf("M=getPlayerSteamID url=%v\n" + url)
+	log.Printf("M=getPlayerSteamID playerName=%v\n", playerName)
 	resp, err := Client.Get(url)
 
 	if err != nil {
@@ -143,7 +143,7 @@ func getPlayerSteamID(playerName string) string {
 // GetPlayerCurrentNickname gets the player identified by steamID current nickname
 func GetPlayerCurrentNickname(steamID string) string {
 	url := buildGetPlayerSummaryURL(steamID)
-	log.Printf("M=getPLayerCurrentNickname url=%v\n", url)
+	log.Printf("M=getPLayerCurrentNickname steamID=%v\n", steamID)
 	resp, err := Client.Get(url)
 
 	if err != nil {
@@ -180,7 +180,7 @@ func buildGetUserURL(userName string) string {
 }
 
 func buildGetURL(steamID string) string {
-	fmt.Printf("M=buildGetURL SteamID=%s\n", steamID)
+	fmt.Printf("M=buildGetURL steamID=%s\n", steamID)
 	return vacBanURL + valveKey + steamIDParamKey + steamID
 }
 

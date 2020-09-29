@@ -2,8 +2,8 @@ package service
 
 import (
 	"database/sql"
-	"fmt"
 	"isvacbanned/model"
+	"log"
 
 	tb "gopkg.in/tucnak/telebot.v2"
 )
@@ -15,11 +15,11 @@ func init() {
 }
 
 func getUserID(user *tb.User) int64 {
-
+	log.Printf("M=getUserID telegramID=%v\n", user.ID)
 	id, err := userModelClient.GetUserID(user.ID)
 	if err != nil && err == sql.ErrNoRows {
 		id = userModelClient.CreateUser(user.FirstName, user.Username, user.ID)
 	}
-	fmt.Println(id)
+
 	return id
 }

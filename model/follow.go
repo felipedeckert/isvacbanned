@@ -2,6 +2,7 @@ package model
 
 import (
 	"database/sql"
+	"isvacbanned/util"
 	"log"
 	"strconv"
 
@@ -21,10 +22,7 @@ type UsersFollowed struct {
 
 // FollowSteamUser links a telegram user to a steam user which is being followed
 func (f *FollowModel) FollowSteamUser(chatID int64, steamID, currNickname string, userID int64) int64 {
-	// PROD
-	//db, err := sql.Open("mysql", "b4efd0d0f3c600:a5e2c7d6@tcp(us-cdbr-east-02.cleardb.com:3306)/heroku_bace7cf727a523d")
-	// LOCAL
-	db, err := sql.Open("mysql", "isvacbanned:root@tcp(localhost:3306)/isvacbanned")
+	db, err := util.GetDatabase()
 
 	if err != nil {
 		panic(err.Error())
@@ -51,12 +49,9 @@ func (f *FollowModel) FollowSteamUser(chatID int64, steamID, currNickname string
 	return lastID
 }
 
-// FollowSteamUser links a telegram user to a steam user which is being followed
+// UnfollowSteamUser sets a followed player flag is_active to false
 func (f *FollowModel) UnfollowSteamUser(steamID string) int64 {
-	// PROD
-	//db, err := sql.Open("mysql", "b4efd0d0f3c600:a5e2c7d6@tcp(us-cdbr-east-02.cleardb.com:3306)/heroku_bace7cf727a523d")
-	// LOCAL
-	db, err := sql.Open("mysql", "isvacbanned:root@tcp(localhost:3306)/isvacbanned")
+	db, err := util.GetDatabase()
 
 	if err != nil {
 		panic(err.Error())
@@ -85,10 +80,7 @@ func (f *FollowModel) UnfollowSteamUser(steamID string) int64 {
 
 //GetFollowerCountBySteamID get the number of followers of a steam player
 func (f *FollowModel) GetFollowerCountBySteamID(steamID string) (int64, error) {
-	// PROD
-	//db, err := sql.Open("mysql", "b4efd0d0f3c600:a5e2c7d6@tcp(us-cdbr-east-02.cleardb.com:3306)/heroku_bace7cf727a523d")
-	// LOCAL
-	db, err := sql.Open("mysql", "isvacbanned:root@tcp(localhost:3306)/isvacbanned")
+	db, err := util.GetDatabase()
 
 	if err != nil {
 		panic(err.Error())
@@ -108,10 +100,7 @@ func (f *FollowModel) GetFollowerCountBySteamID(steamID string) (int64, error) {
 
 //GetAllIncompletedFollowedUsers get all fallowed steam user for every telegram user
 func (f *FollowModel) GetAllIncompletedFollowedUsers() map[int64][]UsersFollowed {
-	// PROD
-	//db, err := sql.Open("mysql", "b4efd0d0f3c600:a5e2c7d6@tcp(us-cdbr-east-02.cleardb.com:3306)/heroku_bace7cf727a523d")
-	// LOCAL
-	db, err := sql.Open("mysql", "isvacbanned:root@tcp(localhost:3306)/isvacbanned")
+	db, err := util.GetDatabase()
 
 	if err != nil {
 		panic(err.Error())
@@ -153,10 +142,7 @@ func (f *FollowModel) GetAllIncompletedFollowedUsers() map[int64][]UsersFollowed
 
 //GetUsersFollowed gets a slice os the nicknames (the old ones) of players followed by a user
 func (f *FollowModel) GetUsersFollowed(userID int64) []UsersFollowed {
-	// PROD
-	//db, err := sql.Open("mysql", "b4efd0d0f3c600:a5e2c7d6@tcp(us-cdbr-east-02.cleardb.com:3306)/heroku_bace7cf727a523d")
-	// LOCAL
-	db, err := sql.Open("mysql", "isvacbanned:root@tcp(localhost:3306)/isvacbanned")
+	db, err := util.GetDatabase()
 
 	if err != nil {
 		panic(err.Error())
@@ -193,10 +179,7 @@ func (f *FollowModel) GetUsersFollowed(userID int64) []UsersFollowed {
 }
 
 func (f *FollowModel) SetCurrNickname(userId int, sanitizedActualNickname string) {
-	// PROD
-	//db, err := sql.Open("mysql", "b4efd0d0f3c600:a5e2c7d6@tcp(us-cdbr-east-02.cleardb.com:3306)/heroku_bace7cf727a523d")
-	// LOCAL
-	db, err := sql.Open("mysql", "isvacbanned:root@tcp(localhost:3306)/isvacbanned")
+	db, err := util.GetDatabase()
 
 	if err != nil {
 		panic(err.Error())
@@ -221,10 +204,7 @@ func (f *FollowModel) SetCurrNickname(userId int, sanitizedActualNickname string
 
 // SetFollowedUserToCompleted sets a player status to completed, and it will not be followed anymore
 func (f *FollowModel) SetFollowedUserToCompleted(id []int) int64 {
-	// PROD
-	//db, err := sql.Open("mysql", "b4efd0d0f3c600:a5e2c7d6@tcp(us-cdbr-east-02.cleardb.com:3306)/heroku_bace7cf727a523d")
-	// LOCAL
-	db, err := sql.Open("mysql", "isvacbanned:root@tcp(localhost:3306)/isvacbanned")
+	db, err := util.GetDatabase()
 
 	if err != nil {
 		panic(err.Error())

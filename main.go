@@ -3,6 +3,7 @@ package main
 import (
 	"isvacbanned/job"
 	"isvacbanned/service"
+	"isvacbanned/util"
 	"log"
 	"os"
 
@@ -30,8 +31,7 @@ func startTelegramBot() {
 		token     = os.Getenv("TOKEN")
 	)
 
-	local := true
-	if local {
+	if util.LOCAL {
 		port = "3000"                                            //os.Getenv("PORT")
 		publicURL = "https://is-vac-banned.herokuapp.com/"       //os.Getenv("PUBLIC_URL")
 		token = "1324910657:AAFSlJn6TD9EeYNn35MEo-YphYlhYhqc_do" //os.Getenv("TOKEN")

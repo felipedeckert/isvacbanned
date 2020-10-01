@@ -14,24 +14,40 @@ func getArgumentFromURL(url string) (string, error) {
 	return splittedInput[len(splittedInput)-1], nil
 }
 
-func getSteamID(url string) (string, error) {
-	steamID := url
+func getSteamID(param string) (string, error) {
+	steamID := param
 	var err error
 	var customID string
-	if strings.Contains(url, "id") {
-		customID, err = getArgumentFromURL(url)
-		steamID = getPlayerSteamID(customID)
-	} else if strings.Contains(url, "profile") {
-		steamID, err = getArgumentFromURL(url)
+
+	if strings.Contains(param, "id") { // URL with CustomID
+		customID, err = getArgumentFromURL(param)
+		if err != nil {
+			log.Printf("M=getSteamID status=invalidCustomID param=%v\n", param)
+
+			return "", err
+		}
+		steamID, err = getPlayerSteamID(customID)
+		if err != nil {
+			log.Printf("M=getSteamID status=CouldNotParseCustomID param=%v\n", param)
+
+			return "", err
+		}
+	} else if strings.Contains(param, "profile") { // URL with SteamID
+		steamID, err = getArgumentFromURL(param)
+		if err != nil {
+			log.Printf("M=getSteamID status=invalidSteamID param=%v\n", param)
+
+			return "", err
+		}
+	} else { // CustomID without URL
+		steamID, err = getPlayerSteamID(param)
+		if err != nil {
+			log.Printf("M=getSteamID status=notACustomID param=%v\n", param)
+			steamID = param
+		}
 	}
 
-	if err != nil {
-		log.Printf("M=getSteamID input=%v\n", url)
-
-		return "", err
-	}
-
-	log.Printf("M=getSteamID input=%v argument=%v\n", url, steamID)
+	log.Printf("M=getSteamID input=%v argument=%v\n", param, steamID)
 
 	return steamID, nil
 }

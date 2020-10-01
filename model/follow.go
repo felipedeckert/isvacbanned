@@ -13,7 +13,7 @@ import (
 type FollowModel struct{}
 
 type UsersFollowed struct {
-	ID           int
+	ID           int64
 	SteamID      string
 	OldNickname  string
 	CurrNickname string
@@ -118,7 +118,7 @@ func (f *FollowModel) GetAllIncompletedFollowedUsers() map[int64][]UsersFollowed
 	m := make(map[int64][]UsersFollowed)
 	for rows.Next() {
 		var (
-			id           int
+			id           int64
 			chatID       int64
 			steamID      string
 			oldNickname  string
@@ -178,7 +178,7 @@ func (f *FollowModel) GetUsersFollowed(userID int64) []UsersFollowed {
 	return s
 }
 
-func (f *FollowModel) SetCurrNickname(userId int, sanitizedActualNickname string) {
+func (f *FollowModel) SetCurrNickname(userId int64, sanitizedActualNickname string) {
 	db, err := util.GetDatabase()
 
 	if err != nil {
@@ -203,7 +203,7 @@ func (f *FollowModel) SetCurrNickname(userId int, sanitizedActualNickname string
 }
 
 // SetFollowedUserToCompleted sets a player status to completed, and it will not be followed anymore
-func (f *FollowModel) SetFollowedUserToCompleted(id []int) int64 {
+func (f *FollowModel) SetFollowedUserToCompleted(id []int64) int64 {
 	db, err := util.GetDatabase()
 
 	if err != nil {
@@ -233,7 +233,26 @@ func (f *FollowModel) SetFollowedUserToCompleted(id []int) int64 {
 	return lastID
 }
 
-func sliceToStringParam(ids []int) string {
+// IsFollowed checks if a user already follows a player
+func (f *FollowModel) IsFollowed(steamID string, userID int64) (int64, error) {
+	db, err := util.GetDatabase()
+
+	if err != nil {
+		panic(err.Error())
+	}
+
+	defer db.Close()
+
+	row := db.QueryRow("SELECT id FROM follow WHERE steam_id = ? AND user_id = ?", steamID, userID)
+
+	var id int64
+
+	err = row.Scan(&id)
+
+	return id, err
+}
+
+func sliceToStringParam(ids []int64) string {
 	if len(ids) == 0 {
 		return ""
 	}
@@ -243,7 +262,7 @@ func sliceToStringParam(ids []int) string {
 	b := make([]byte, 0, estimate)
 
 	for _, n := range ids {
-		b = strconv.AppendInt(b, int64(n), 10)
+		b = strconv.AppendInt(b, n, 10)
 		b = append(b, ',')
 	}
 	b = b[:len(b)-1]

@@ -2,6 +2,7 @@ package service
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -14,6 +15,7 @@ const userURL = "http://api.steampowered.com/ISteamUser/ResolveVanityURL/v0001/?
 const playerSummaryURL = "http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key="
 const userParamKey = "&vanityurl="
 const steamIDParamKey = "&steamids="
+const noMatch int = 42
 
 var Client HTTPClient
 
@@ -81,7 +83,7 @@ func unmarshalPlayer(jsonInput []byte) Player {
 	return player
 }
 
-func unmarshalSteamID(str []byte) string {
+func unmarshalSteamID(str []byte) (string, error) {
 	playerID := PlayerSteamID{}
 
 	err := json.Unmarshal(str, &playerID)
@@ -90,7 +92,11 @@ func unmarshalSteamID(str []byte) string {
 		panic(err)
 	}
 
-	return playerID.Response.SteamId
+	if playerID.Response.Success == noMatch {
+		return "", errors.New("User not found")
+	}
+
+	return playerID.Response.SteamId, nil
 }
 
 func getAllPlayersStatus(userSteamID map[string]string) map[string]Player {
@@ -121,23 +127,31 @@ func GetPlayerStatus(steamID string) Player {
 	return unmarshalPlayer(result)
 }
 
-func getPlayerSteamID(playerName string) string {
+func getPlayerSteamID(playerName string) (string, error) {
 	url := buildGetUserURL(playerName)
 	log.Printf("M=getPlayerSteamID playerName=%v\n", playerName)
 	resp, err := Client.Get(url)
 
 	if err != nil {
-		log.Printf("M=getPlayerSteamID err=%s\n", err)
-		log.Fatal(err)
+		log.Printf("M=getPlayerSteamID step=get err=%s\n", err)
+		return "", errors.New("Unable to get player!")
 	}
 
 	result, err := ioutil.ReadAll(resp.Body)
 	defer resp.Body.Close()
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("M=getPlayerSteamID step=parse err=%s\n", err)
+		return "", errors.New("Unable to parse player!")
 	}
 
-	return unmarshalSteamID(result)
+	res, err := unmarshalSteamID(result)
+
+	if err != nil {
+		log.Printf("M=getPlayerSteamID step=unmarshal err=%s\n", err)
+		return "", err
+	}
+
+	return res, nil
 }
 
 // GetPlayerCurrentNickname gets the player identified by steamID current nickname

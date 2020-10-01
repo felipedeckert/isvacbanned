@@ -20,9 +20,9 @@ func getStartResponse(username string) string {
 		"/stop : to disable any notifications you signed up for before;\n\n"+
 		"/follow <argument>: follow a player, you'll be notified about nickname changes and VAC bans;\n"+
 		"if you have previously disabled notifications, they will be enabled again.\n"+
-		"<argument> can be either a Steam ID or the player's profile URL.\n\n"+
+		"<argument> can be either a Steam ID, Custom ID or the player's profile URL.\n\n"+
 		"/unfollow <argument>: disables notifications about a specific player;\n"+
-		"<argument> MUST be a Steam ID!\n\n"+
+		"<argument> MUST be either a Steam ID or Custom ID!\n\n"+
 		"/show : displays a list of every player you're following with its BAN status;\n\n"+
 		"Consider donating to help keep this service up and running: linkToPaypal.com", username)
 }

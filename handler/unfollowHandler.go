@@ -1,10 +1,11 @@
 package handler
 
 import (
-	tb "gopkg.in/tucnak/telebot.v2"
 	"isvacbanned/messager"
 	"isvacbanned/model"
 	"isvacbanned/util"
+
+	tb "gopkg.in/tucnak/telebot.v2"
 )
 
 type UnfollowHandler struct{}
@@ -36,5 +37,5 @@ func getUnsuccessfulUnfollowResponse() string {
 }
 
 func getSuccessfulUnfollowResponse(steamID string) string {
-	return "You will NOT receive mora updates about this player: " + util.SteamProfileURL + steamID
+	return "You will NOT receive more updates about this player: " + util.SteamProfileURL + steamID
 }

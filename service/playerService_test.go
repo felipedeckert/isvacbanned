@@ -30,9 +30,10 @@ func TestGetPlayerSteamID(t *testing.T) {
 	}
 
 	playerName := "fallen"
-	res := getPlayerSteamID(playerName)
+	res, err := getPlayerSteamID(playerName)
 
 	assert.EqualValues(t, steamID, res)
+	assert.Nil(err)
 }
 
 func TestGetPlayerCurrentNickname(t *testing.T) {

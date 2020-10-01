@@ -29,17 +29,17 @@ func RunScheduler() {
 	log.Printf("M=RunScheduler\n")
 	scheduler := gocron.NewScheduler(time.UTC)
 
-	scheduler.Every(30).Seconds().Do(checkFollownUsers)
+	scheduler.Every(30).Minutes().Do(checkFollownUsers)
 
 	scheduler.StartAsync()
 }
 
 func checkFollownUsers() {
 	usersIncompleted := followModelClient.GetAllIncompletedFollowedUsers()
-	var usersToComplete []int
+	var usersToComplete []int64
 	for chatID, steamIDList := range usersIncompleted {
 		for _, users := range steamIDList {
-			usersToComplete = handleFollowedUser(users, chatID)
+			usersToComplete = append(usersToComplete, handleFollowedUser(users, chatID)...)
 		}
 	}
 	if len(usersToComplete) > 0 {
@@ -50,8 +50,8 @@ func checkFollownUsers() {
 	log.Printf("M=checkFollownUsers usersToCompleteCount=%v\n", len(usersToComplete))
 }
 
-func handleFollowedUser(user model.UsersFollowed, chatID int64) []int {
-	idsToUpdate := make([]int, 0)
+func handleFollowedUser(user model.UsersFollowed, chatID int64) []int64 {
+	idsToUpdate := make([]int64, 0)
 	player := service.GetPlayerStatus(user.SteamID)
 	playerData := player.Players[0]
 

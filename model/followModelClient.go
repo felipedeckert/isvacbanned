@@ -6,6 +6,7 @@ type FollowModelClient interface {
 	GetFollowerCountBySteamID(steamID string) (int64, error)
 	GetAllIncompletedFollowedUsers() map[int64][]UsersFollowed
 	GetUsersFollowed(userID int64) []UsersFollowed
-	SetCurrNickname(userId int, sanitizedActualNickname string)
-	SetFollowedUserToCompleted(id []int) int64
+	SetCurrNickname(userId int64, sanitizedActualNickname string)
+	SetFollowedUserToCompleted(id []int64) int64
+	IsFollowed(steamID string, userID int64) (int64, error)
 }

@@ -2,12 +2,13 @@ package service
 
 import (
 	"isvacbanned/handler"
+	"isvacbanned/util"
 	"log"
+	"strconv"
 
 	tb "gopkg.in/tucnak/telebot.v2"
 )
 
-const steamIDLength = 17
 const playerBanned = "This player is VAC banned!"
 const playerNotBanned = "This player is NOT VAC banned!"
 
@@ -52,16 +53,22 @@ func setUpFollowHandler(m *tb.Message, bot *tb.Bot) int64 {
 	userID := getUserID(m.Sender)
 	steamID, err := getSteamID(m.Payload)
 
-	log.Printf("M=setUpFollowHandler userID=%v steamID=%v\n", userID, steamID)
+	log.Printf("M=setUpFollowHandler payload=%v userID=%v steamID=%v\n", m.Payload, userID, steamID)
 
-	if err != nil || len(steamID) != steamIDLength {
+	if err != nil {
+		bot.Send(m.Sender, err.Error())
+		return -1
+	} else if len(steamID) != util.SteamIDLength || !isNumeric(steamID) {
 		bot.Send(m.Sender, "Invalid Param!")
 		return -1
 	}
 
 	currNickname := GetPlayerCurrentNickname(steamID)
 
-	return followHandler.FollowHandler(m, bot, steamID, currNickname, userID)
+	player := GetPlayerStatus(steamID)
+	playerData := player.Players[0]
+
+	return followHandler.FollowHandler(m, bot, steamID, currNickname, userID, playerData.VACBanned)
 }
 
 func setUpShowHandler(m *tb.Message, bot *tb.Bot) {
@@ -85,10 +92,18 @@ func setUpUnfollowHandler(m *tb.Message, bot *tb.Bot) {
 
 	log.Printf("M=setUpUnfollowHandler steamID=%v\n", steamID)
 
-	if err != nil || len(steamID) != steamIDLength {
+	if err != nil {
+		bot.Send(m.Sender, err.Error())
+		return
+	} else if len(steamID) != util.SteamIDLength || !isNumeric(steamID) {
 		bot.Send(m.Sender, "Invalid Param!")
 		return
 	}
 
 	unfollowHandler.UnfollowHandler(m, bot, steamID)
+}
+
+func isNumeric(s string) bool {
+	_, err := strconv.ParseFloat(s, 64)
+	return err == nil
 }

@@ -7,7 +7,7 @@ import (
 )
 
 var (
-	LOCAL    bool    = true
+	LOCAL    bool    = false
 	Database *sql.DB = nil
 	mutex    sync.Mutex
 	MyTx     *sql.Tx

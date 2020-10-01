@@ -22,13 +22,8 @@ type UsersFollowed struct {
 
 // FollowSteamUser links a telegram user to a steam user which is being followed
 func (f *FollowModel) FollowSteamUser(chatID int64, steamID, currNickname string, userID int64) int64 {
-	db, err := util.GetDatabase()
 
-	if err != nil {
-		panic(err.Error())
-	}
-
-	stmt, err := db.Prepare("INSERT INTO follow(chat_id, steam_id, user_id, old_nickname, curr_nickname) VALUES(?, ?, ?, ?, ?)")
+	stmt, err := util.GetDatabase().Prepare("INSERT INTO follow(chat_id, steam_id, user_id, old_nickname, curr_nickname) VALUES(?, ?, ?, ?, ?)")
 
 	if err != nil {
 		panic(err.Error())
@@ -51,13 +46,8 @@ func (f *FollowModel) FollowSteamUser(chatID int64, steamID, currNickname string
 
 // UnfollowSteamUser sets a followed player flag is_active to false
 func (f *FollowModel) UnfollowSteamUser(steamID string) int64 {
-	db, err := util.GetDatabase()
 
-	if err != nil {
-		panic(err.Error())
-	}
-
-	stmt, err := db.Prepare("UPDATE follow SET is_active = false where steam_id = ?")
+	stmt, err := util.GetDatabase().Prepare("UPDATE follow SET is_active = false where steam_id = ?")
 
 	if err != nil {
 		panic(err.Error())
@@ -80,35 +70,23 @@ func (f *FollowModel) UnfollowSteamUser(steamID string) int64 {
 
 //GetFollowerCountBySteamID get the number of followers of a steam player
 func (f *FollowModel) GetFollowerCountBySteamID(steamID string) (int64, error) {
-	db, err := util.GetDatabase()
 
-	if err != nil {
-		panic(err.Error())
-	}
-
-	row := db.QueryRow(
+	row := util.GetDatabase().QueryRow(
 		"SELECT COUNT(f.id) as count"+
 			"	FROM follow f "+
 			"	WHERE f.steam_id = ?", steamID)
 
 	var count int64
 
-	err = row.Scan(&count)
+	err := row.Scan(&count)
 
 	return count, err
 }
 
 //GetAllIncompletedFollowedUsers get all fallowed steam user for every telegram user
 func (f *FollowModel) GetAllIncompletedFollowedUsers() map[int64][]UsersFollowed {
-	db, err := util.GetDatabase()
 
-	if err != nil {
-		panic(err.Error())
-	}
-
-	defer db.Close()
-
-	rows, err := db.Query("SELECT id, chat_id, steam_id, old_nickname, curr_nickname FROM follow WHERE is_completed <> true AND is_active = true")
+	rows, err := util.GetDatabase().Query("SELECT id, chat_id, steam_id, old_nickname, curr_nickname FROM follow WHERE is_completed <> true AND is_active = true")
 
 	if err != nil {
 		log.Fatal(err)
@@ -142,15 +120,8 @@ func (f *FollowModel) GetAllIncompletedFollowedUsers() map[int64][]UsersFollowed
 
 //GetUsersFollowed gets a slice os the nicknames (the old ones) of players followed by a user
 func (f *FollowModel) GetUsersFollowed(userID int64) []UsersFollowed {
-	db, err := util.GetDatabase()
 
-	if err != nil {
-		panic(err.Error())
-	}
-
-	defer db.Close()
-
-	rows, err := db.Query("SELECT old_nickname, is_completed FROM follow WHERE user_id = ?", userID)
+	rows, err := util.GetDatabase().Query("SELECT old_nickname, is_completed FROM follow WHERE user_id = ?", userID)
 
 	if err != nil {
 		log.Fatal(err)
@@ -178,22 +149,16 @@ func (f *FollowModel) GetUsersFollowed(userID int64) []UsersFollowed {
 	return s
 }
 
-func (f *FollowModel) SetCurrNickname(userId int64, sanitizedActualNickname string) {
-	db, err := util.GetDatabase()
+//SetCurrNickname updates de curr_nickname of a given player
+func (f *FollowModel) SetCurrNickname(userID int64, sanitizedActualNickname string) {
+
+	stmt, err := util.GetDatabase().Prepare("UPDATE follow SET curr_nickname = ? where id = ?")
 
 	if err != nil {
 		panic(err.Error())
 	}
 
-	defer db.Close()
-
-	stmt, err := db.Prepare("UPDATE follow SET curr_nickname = ? where id = ?")
-
-	if err != nil {
-		panic(err.Error())
-	}
-
-	_, err = stmt.Exec(sanitizedActualNickname, userId)
+	_, err = stmt.Exec(sanitizedActualNickname, userID)
 
 	defer stmt.Close()
 	if err != nil {
@@ -204,15 +169,8 @@ func (f *FollowModel) SetCurrNickname(userId int64, sanitizedActualNickname stri
 
 // SetFollowedUserToCompleted sets a player status to completed, and it will not be followed anymore
 func (f *FollowModel) SetFollowedUserToCompleted(id []int64) int64 {
-	db, err := util.GetDatabase()
 
-	if err != nil {
-		panic(err.Error())
-	}
-
-	defer db.Close()
-
-	stmt, err := db.Prepare("UPDATE follow SET is_completed = true where id in(?)")
+	stmt, err := util.GetDatabase().Prepare("UPDATE follow SET is_completed = true where id in(?)")
 
 	if err != nil {
 		panic(err.Error())
@@ -235,19 +193,12 @@ func (f *FollowModel) SetFollowedUserToCompleted(id []int64) int64 {
 
 // IsFollowed checks if a user already follows a player
 func (f *FollowModel) IsFollowed(steamID string, userID int64) (int64, error) {
-	db, err := util.GetDatabase()
 
-	if err != nil {
-		panic(err.Error())
-	}
-
-	defer db.Close()
-
-	row := db.QueryRow("SELECT id FROM follow WHERE steam_id = ? AND user_id = ?", steamID, userID)
+	row := util.GetDatabase().QueryRow("SELECT id FROM follow WHERE steam_id = ? AND user_id = ?", steamID, userID)
 
 	var id int64
 
-	err = row.Scan(&id)
+	err := row.Scan(&id)
 
 	return id, err
 }

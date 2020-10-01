@@ -7,6 +7,10 @@ import (
 )
 
 func getArgumentFromURL(url string) (string, error) {
+	if last := len(url) - 1; last >= 0 && url[last] == '/' {
+		url = url[:last]
+	}
+
 	splittedInput := strings.Split(url, "/")
 	if len(splittedInput) < 2 {
 		return "", errors.New("Invalid URL")

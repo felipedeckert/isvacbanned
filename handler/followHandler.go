@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"isvacbanned/messager"
 	"isvacbanned/model"
-	"isvacbanned/util"
 	"log"
 
 	tb "gopkg.in/tucnak/telebot.v2"
@@ -34,8 +33,6 @@ func (f *FollowHandler) FollowHandler(m *tb.Message, bot *tb.Bot, steamID, currN
 	if err != nil {
 		panic(err)
 	}
-
-	currNickname = util.SanitizeString(currNickname)
 
 	var dbID int64
 

@@ -13,10 +13,12 @@ var (
 	MyTx     *sql.Tx
 )
 
+//GetDatabase returns a *sql.DB, that should have been initialized before by StartDatabase()
 func GetDatabase() *sql.DB {
 	return Database
 }
 
+//StartDatabase opens a database connection
 func StartDatabase() {
 	var db *sql.DB
 	var err error

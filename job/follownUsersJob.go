@@ -29,17 +29,18 @@ func RunScheduler() {
 	log.Printf("M=RunScheduler\n")
 	scheduler := gocron.NewScheduler(time.UTC)
 
-	scheduler.Every(30).Minutes().Do(checkFollownUsers)
+	scheduler.Every(60).Minutes().Do(checkFollownUsersBan)
+	scheduler.Every(10).Minutes().Do(checkFollownUsersNickname)
 
 	scheduler.StartAsync()
 }
 
-func checkFollownUsers() {
+func checkFollownUsersBan() {
 	usersIncompleted := followModelClient.GetAllIncompletedFollowedUsers()
 	var usersToComplete []int64
 	for chatID, steamIDList := range usersIncompleted {
 		for _, users := range steamIDList {
-			usersToComplete = append(usersToComplete, handleFollowedUser(users, chatID)...)
+			usersToComplete = append(usersToComplete, hasPlayerBeenBanned(users, chatID)...)
 		}
 	}
 	if len(usersToComplete) > 0 {
@@ -47,28 +48,41 @@ func checkFollownUsers() {
 		followModelClient.SetFollowedUserToCompleted(usersToComplete)
 	}
 
-	log.Printf("M=checkFollownUsers usersToCompleteCount=%v\n", len(usersToComplete))
+	log.Printf("M=checkFollownUsersBan usersToCompleteCount=%v\n", len(usersToComplete))
 }
 
-func handleFollowedUser(user model.UsersFollowed, chatID int64) []int64 {
+func checkFollownUsersNickname() {
+	usersIncompleted := followModelClient.GetAllIncompletedFollowedUsers()
+
+	for chatID, steamIDList := range usersIncompleted {
+		for _, users := range steamIDList {
+			hasPlayerChangedNickname(users, chatID)
+		}
+	}
+}
+
+func hasPlayerBeenBanned(user model.UsersFollowed, chatID int64) []int64 {
 	idsToUpdate := make([]int64, 0)
 	player := service.GetPlayerStatus(user.SteamID)
 	playerData := player.Players[0]
 
-	actualNickname := service.GetPlayerCurrentNickname(user.SteamID)
-
-	sanitizedActualNickname := util.SanitizeString(actualNickname)
-
 	if playerData.VACBanned {
-		log.Printf("M=handleFollowedUser steamID=%v status=banned\n", user.SteamID)
+		actualNickname := service.GetPlayerCurrentNickname(user.SteamID)
+		log.Printf("M=hasPlayerBeenBanned steamID=%v status=banned\n", user.SteamID)
 		sendMessageToUser(buildBanMessage(user.OldNickname, actualNickname, user.SteamID, playerData.DaysSinceLastBan), chatID)
 		idsToUpdate = append(idsToUpdate, user.ID)
-	} else if user.CurrNickname != sanitizedActualNickname {
-		log.Printf("M=handleFollowedUser steamID=%v status=changedNickname\n", user.SteamID)
-		followModelClient.SetCurrNickname(user.ID, sanitizedActualNickname)
-		sendMessageToUser(buildNicknameChangedMessage(user.OldNickname, actualNickname, user.SteamID), chatID)
 	}
 	return idsToUpdate
+}
+
+func hasPlayerChangedNickname(user model.UsersFollowed, chatID int64) {
+	actualNickname := service.GetPlayerCurrentNickname(user.SteamID)
+
+	if user.CurrNickname != actualNickname {
+		log.Printf("M=hasPlayerBeenBanned steamID=%v status=changedNickname\n", user.SteamID)
+		followModelClient.SetCurrNickname(user.ID, actualNickname)
+		sendMessageToUser(buildNicknameChangedMessage(user.OldNickname, actualNickname, user.SteamID), chatID)
+	}
 }
 
 func sendMessageToUser(message string, chatID int64) {
@@ -94,7 +108,7 @@ func buildNicknameChangedMessage(oldNickname, currNickname, steamID string) stri
 func buildBanMessage(oldNickname, currNickname, steamID string, daysSinceLastBan int) string {
 	// if the player hasn't changed nickname no reason to return redundant message
 	changedNickPhrase := ""
-	if oldNickname != util.SanitizeString(currNickname) {
+	if oldNickname != currNickname {
 		changedNickPhrase = ", now under the nickname " + currNickname
 	}
 	return "The user you followed as " + oldNickname + changedNickPhrase + ", Steam Profile: " + util.SteamProfileURL + steamID + ", has been BANNED " + strconv.Itoa(daysSinceLastBan) + " days ago! You won't be notified about this player anymore."

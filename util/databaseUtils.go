@@ -2,6 +2,7 @@ package util
 
 import (
 	"database/sql"
+	"os"
 	"sync"
 	"time"
 )
@@ -20,8 +21,12 @@ func GetDatabase() *sql.DB {
 
 //StartDatabase opens a database connection
 func StartDatabase() {
-	var db *sql.DB
-	var err error
+	var (
+		db  *sql.DB
+		err error
+	)
+
+	credentials := os.Getenv("DATABASE_CREDENTIAL")
 
 	mutex.Lock()
 
@@ -30,7 +35,7 @@ func StartDatabase() {
 		db, err = sql.Open("mysql", "isvacbanned:root@tcp(localhost:3306)/isvacbanned")
 	} else {
 		// PROD
-		db, err = sql.Open("mysql", "b4efd0d0f3c600:a5e2c7d6@tcp(us-cdbr-east-02.cleardb.com:3306)/heroku_bace7cf727a523d")
+		db, err = sql.Open("mysql", credentials+"@tcp(us-cdbr-east-02.cleardb.com:3306)/heroku_bace7cf727a523d")
 	}
 
 	if err != nil {

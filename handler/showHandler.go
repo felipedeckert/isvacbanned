@@ -1,12 +1,15 @@
 package handler
 
 import (
+	"fmt"
 	"isvacbanned/model"
 	"log"
 	"strings"
 
 	tb "gopkg.in/tucnak/telebot.v2"
 )
+
+const maxMessageLength int = 3800
 
 var followClient model.FollowModelClient
 
@@ -30,23 +33,31 @@ func ShowHandler(m *tb.Message, bot *tb.Bot, userID int64) {
 }
 
 func getShowResponse(followedUsers []model.UsersFollowed) string {
-	if len(followedUsers) == 0 {
+	total := len(followedUsers)
+
+	if total == 0 {
 		return "You're not following any player yet!"
 	}
 
-	return "You're following these users: \n" + getPlayersAndStatusAsShoppingList(followedUsers)
+	msg, count := getPlayersAndStatusAsShoppingList(followedUsers)
+
+	return fmt.Sprintf("You're following these users: \n%v And %v more...", msg, total-count)
 }
 
-func getPlayersAndStatusAsShoppingList(followedUsers []model.UsersFollowed) string {
+func getPlayersAndStatusAsShoppingList(followedUsers []model.UsersFollowed) (string, int) {
 	var str strings.Builder
-
+	var count int
 	for _, user := range followedUsers {
+		count++
 		status := "NOT BANNED"
 		if user.IsCompleted {
 			status = "BANNED"
 		}
 		str.WriteString(user.OldNickname + " : " + status + ",\n")
+		if str.Len() > maxMessageLength {
+			break
+		}
 	}
 
-	return str.String()
+	return str.String(), count
 }

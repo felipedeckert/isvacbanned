@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"fmt"
 	"isvacbanned/model"
 	"log"
 	"strings"
@@ -9,7 +8,7 @@ import (
 	tb "gopkg.in/tucnak/telebot.v2"
 )
 
-const maxMessageLength int = 3800
+const maxMessageLength int = 4000
 
 var followClient model.FollowModelClient
 
@@ -23,41 +22,51 @@ func ShowHandler(m *tb.Message, bot *tb.Bot, userID int64) {
 
 	log.Printf("M=ShowHandler L=I userID=%v usersFollowedCount=%v\n", m.Chat.ID, len(followedUsers))
 
-	message := getShowResponse(followedUsers)
+	sendShowResponse(followedUsers, bot, m)
+}
 
-	_, err := bot.Send(m.Chat, message)
+func sendShowResponse(followedUsers []model.UsersFollowed, bot *tb.Bot, m *tb.Message) {
+	total := len(followedUsers)
+
+	if total == 0 {
+		bot.Send(m.Chat, "You're not following any player yet!")
+	}
+
+	sendMessageBatch(followedUsers, bot, m)
+}
+
+func sendMessageBatch(followedUsers []model.UsersFollowed, bot *tb.Bot, m *tb.Message) {
+	var sb strings.Builder
+	var count int
+	var status string
+	var prefix string
+	sb.WriteString("You're following these users: \n")
+	for _, user := range followedUsers {
+		count++
+		prefix = ""
+		status = "NOT BANNED"
+		if user.IsCompleted {
+			prefix = "❌ "
+			status = "BANNED ❌"
+		}
+		sb.WriteString(prefix + user.OldNickname + " : " + status + ",\n")
+		if sb.Len() > maxMessageLength {
+			sendAndResetBuffer(&sb, bot, m)
+		}
+	}
+
+	if sb.Len() > 0 {
+		bot.Send(m.Chat, sb.String())
+	}
+
+}
+
+func sendAndResetBuffer(sb *strings.Builder, bot *tb.Bot, m *tb.Message) {
+	_, err := bot.Send(m.Chat, sb.String())
+
+	sb.Reset()
 
 	if err != nil {
 		log.Printf("M=ShowHandler L=E userID=%v err=%v\n", m.Chat.ID, err.Error())
 	}
-}
-
-func getShowResponse(followedUsers []model.UsersFollowed) string {
-	total := len(followedUsers)
-
-	if total == 0 {
-		return "You're not following any player yet!"
-	}
-
-	msg, count := getPlayersAndStatusAsShoppingList(followedUsers)
-
-	return fmt.Sprintf("You're following these users: \n%v And %v more...", msg, total-count)
-}
-
-func getPlayersAndStatusAsShoppingList(followedUsers []model.UsersFollowed) (string, int) {
-	var str strings.Builder
-	var count int
-	for _, user := range followedUsers {
-		count++
-		status := "NOT BANNED"
-		if user.IsCompleted {
-			status = "BANNED"
-		}
-		str.WriteString(user.OldNickname + " : " + status + ",\n")
-		if str.Len() > maxMessageLength {
-			break
-		}
-	}
-
-	return str.String(), count
 }

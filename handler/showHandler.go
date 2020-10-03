@@ -18,11 +18,15 @@ func init() {
 func ShowHandler(m *tb.Message, bot *tb.Bot, userID int64) {
 	followedUsers := followClient.GetUsersFollowed(userID)
 
-	log.Printf("M=ShowHandler userID=%v usersFollowedCount=%v\n", m.Chat.ID, len(followedUsers))
+	log.Printf("M=ShowHandler L=I userID=%v usersFollowedCount=%v\n", m.Chat.ID, len(followedUsers))
 
 	message := getShowResponse(followedUsers)
 
-	bot.Send(m.Chat, message)
+	_, err := bot.Send(m.Chat, message)
+
+	if err != nil {
+		log.Printf("M=ShowHandler L=E userID=%v err=%v\n", m.Chat.ID, err.Error())
+	}
 }
 
 func getShowResponse(followedUsers []model.UsersFollowed) string {

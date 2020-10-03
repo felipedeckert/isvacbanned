@@ -19,7 +19,7 @@ func ShowHandler(m *tb.Message, bot *tb.Bot, userID int64) {
 
 	message := getShowResponse(followedUsers)
 
-	bot.Send(m.Sender, message)
+	bot.Send(m.Chat, message)
 }
 
 func getShowResponse(followedUsers []model.UsersFollowed) string {

@@ -16,9 +16,9 @@ func init() {
 }
 
 //UnfollowHandler handles a follow request
-func (f *UnfollowHandler) UnfollowHandler(m *tb.Message, bot *tb.Bot, steamID string) {
+func (f *UnfollowHandler) UnfollowHandler(m *tb.Message, bot *tb.Bot, steamID string, userID int64) {
 
-	rows := FollowClient.UnfollowSteamUser(steamID)
+	rows := FollowClient.UnfollowSteamUser(userID, steamID)
 
 	var message string
 
@@ -28,7 +28,7 @@ func (f *UnfollowHandler) UnfollowHandler(m *tb.Message, bot *tb.Bot, steamID st
 		message = getSuccessfulUnfollowResponse(steamID)
 	}
 
-	MsgClient.SendMessage(bot, m.Sender, message)
+	MsgClient.SendMessageToChat(bot, m.Chat, message)
 
 }
 

@@ -45,15 +45,15 @@ func (f *FollowModel) FollowSteamUser(chatID int64, steamID, currNickname string
 }
 
 // UnfollowSteamUser sets a followed player flag is_active to false
-func (f *FollowModel) UnfollowSteamUser(steamID string) int64 {
+func (f *FollowModel) UnfollowSteamUser(userID int64, steamID string) int64 {
 
-	stmt, err := util.GetDatabase().Prepare("UPDATE follow SET is_active = false where steam_id = ?")
+	stmt, err := util.GetDatabase().Prepare("UPDATE follow SET is_active = false where user_id = ? AND steam_id = ?")
 
 	if err != nil {
 		panic(err.Error())
 	}
 
-	res, err := stmt.Exec(steamID)
+	res, err := stmt.Exec(userID, steamID)
 
 	defer stmt.Close()
 	if err != nil {

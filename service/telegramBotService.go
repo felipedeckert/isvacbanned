@@ -50,16 +50,16 @@ func setUpBotHandlers(bot *tb.Bot) {
 }
 
 func setUpFollowHandler(m *tb.Message, bot *tb.Bot) int64 {
-	userID := getUserID(m.Sender)
+	userID := getUserID(m.Chat)
 	steamID, err := getSteamID(m.Payload)
 
 	log.Printf("M=setUpFollowHandler payload=%v userID=%v steamID=%v\n", m.Payload, userID, steamID)
 
 	if err != nil {
-		bot.Send(m.Sender, err.Error())
+		bot.Send(m.Chat, err.Error())
 		return -1
 	} else if len(steamID) != util.SteamIDLength || !isNumeric(steamID) {
-		bot.Send(m.Sender, "Invalid Param!")
+		bot.Send(m.Chat, "Invalid Param!")
 		return -1
 	}
 
@@ -72,13 +72,13 @@ func setUpFollowHandler(m *tb.Message, bot *tb.Bot) int64 {
 }
 
 func setUpShowHandler(m *tb.Message, bot *tb.Bot) {
-	userID := getUserID(m.Sender)
+	userID := getUserID(m.Chat)
 
 	handler.ShowHandler(m, bot, userID)
 }
 
 func setUpStopHandler(m *tb.Message, bot *tb.Bot) {
-	userID := getUserID(m.Sender)
+	userID := getUserID(m.Chat)
 
 	handler.StopHandler(m, bot, userID)
 }
@@ -88,19 +88,20 @@ func setUpStartHandler(m *tb.Message, bot *tb.Bot) {
 }
 
 func setUpUnfollowHandler(m *tb.Message, bot *tb.Bot) {
+	userID := getUserID(m.Chat)
 	steamID, err := getSteamID(m.Payload)
 
 	log.Printf("M=setUpUnfollowHandler steamID=%v\n", steamID)
 
 	if err != nil {
-		bot.Send(m.Sender, err.Error())
+		bot.Send(m.Chat, err.Error())
 		return
 	} else if len(steamID) != util.SteamIDLength || !isNumeric(steamID) {
-		bot.Send(m.Sender, "Invalid Param!")
+		bot.Send(m.Chat, "Invalid Param!")
 		return
 	}
 
-	unfollowHandler.UnfollowHandler(m, bot, steamID)
+	unfollowHandler.UnfollowHandler(m, bot, steamID, userID)
 }
 
 func isNumeric(s string) bool {

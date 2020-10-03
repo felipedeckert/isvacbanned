@@ -10,7 +10,7 @@ import (
 func StartHandler(m *tb.Message, bot *tb.Bot) {
 	message := getStartResponse(m.Sender.FirstName)
 
-	bot.Send(m.Sender, message)
+	bot.Send(m.Chat, message)
 }
 
 func getStartResponse(username string) string {

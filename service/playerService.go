@@ -3,7 +3,6 @@ package service
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -184,23 +183,23 @@ func GetPlayerCurrentNickname(steamID string) string {
 }
 
 func buildGetPlayerSummaryURL(steamID string) string {
-	fmt.Printf("M=buildGetPlayerSummaryURL SteamID=%s\n", steamID)
+	log.Printf("M=buildGetPlayerSummaryURL SteamID=%s\n", steamID)
 	return playerSummaryURL + valveKey + steamIDParamKey + steamID
 }
 
 func buildGetUserURL(userName string) string {
-	fmt.Printf("M=buildGetUserURL userName=%s\n", userName)
+	log.Printf("M=buildGetUserURL userName=%s\n", userName)
 	return userURL + valveKey + userParamKey + userName
 }
 
 func buildGetURL(steamID string) string {
-	fmt.Printf("M=buildGetURL steamID=%s\n", steamID)
+	log.Printf("M=buildGetURL steamID=%s\n", steamID)
 	return vacBanURL + valveKey + steamIDParamKey + steamID
 }
 
 //UpdatePlayersStatus updates players status on given spreadsheet
 func UpdatePlayersStatus(spreadsheetID string) {
-	fmt.Printf("M=UpdatePlayersStatus spreadsheetID=%v\n", spreadsheetID)
+	log.Printf("M=UpdatePlayersStatus spreadsheetID=%v\n", spreadsheetID)
 
 	userSteamID := GetSteamIDs(spreadsheetID)
 

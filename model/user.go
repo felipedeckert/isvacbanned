@@ -7,7 +7,7 @@ import (
 type UserModel struct{}
 
 // GetUserID returns database user id for a telegram user id
-func (u UserModel) GetUserID(telegramID int) (int64, error) {
+func (u UserModel) GetUserID(telegramID int64) (int64, error) {
 
 	row := util.GetDatabase().QueryRow("SELECT id FROM user WHERE telegram_id = ?", telegramID)
 
@@ -19,7 +19,7 @@ func (u UserModel) GetUserID(telegramID int) (int64, error) {
 }
 
 // CreateUser inserts a new user in the database
-func (u UserModel) CreateUser(firstName, username string, telegramID int) int64 {
+func (u UserModel) CreateUser(firstName, username string, telegramID int64) int64 {
 
 	stmt, err := util.GetDatabase().Prepare("INSERT INTO user(first_name, username, telegram_id) VALUES(?, ?, ?)")
 

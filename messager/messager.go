@@ -7,3 +7,7 @@ type MessageClient struct{}
 func (m *MessageClient) SendMessage(bot *tb.Bot, user *tb.User, message string) {
 	bot.Send(user, message)
 }
+
+func (m *MessageClient) SendMessageToChat(bot *tb.Bot, chat *tb.Chat, message string) {
+	bot.Send(chat, message)
+}

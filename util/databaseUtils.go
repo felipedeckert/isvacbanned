@@ -7,7 +7,7 @@ import (
 )
 
 var (
-	LOCAL    bool    = false
+	LOCAL    bool    = true
 	Database *sql.DB = nil
 	mutex    sync.Mutex
 	MyTx     *sql.Tx
@@ -41,7 +41,7 @@ func StartDatabase() {
 		panic("Erro ao acessar o banco de dados!!!")
 	}
 
-	db.SetMaxIdleConns(5)
+	db.SetMaxIdleConns(0)
 	db.SetMaxOpenConns(20)
 	db.SetConnMaxLifetime(time.Duration(600) * time.Second)
 

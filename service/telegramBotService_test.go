@@ -22,12 +22,12 @@ func TestSetUpFollowHandler(t *testing.T) {
 
 	user := tb.User{ID: 123, FirstName: "Gabriel", Username: "fallen"}
 
-	chat := tb.Chat{ID: 456}
+	chat := tb.Chat{ID: 456, FirstName: "Gabriel", Username: "fallen"}
 
 	msg := tb.Message{Sender: &user, Payload: "12345678901234567", Chat: &chat}
 	bot := tb.Bot{}
 
-	mock.GetGetUserIDFunc = func(telegramID int) (int64, error) {
+	mock.GetGetUserIDFunc = func(telegramID int64) (int64, error) {
 		return 123, nil
 	}
 
@@ -53,7 +53,7 @@ func TestSetUpFollowHandler(t *testing.T) {
 		return expectedResult
 	}
 
-	mock.GetSendMessage = func(bot *tb.Bot, user *tb.User, message string) {}
+	mock.GetSendMessageToChat = func(bot *tb.Bot, user *tb.Chat, message string) {}
 
 	dbID := setUpFollowHandler(&msg, &bot)
 

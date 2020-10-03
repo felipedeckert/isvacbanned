@@ -2,19 +2,19 @@ package mock
 
 //UserModelClient is the mock client
 type UserModelClient struct {
-	GetGetUserIDFunc  func(telegramID int) (int64, error)
-	GetCreateUserFunc func(firstName, username string, telegramID int) int64
+	GetGetUserIDFunc  func(telegramID int64) (int64, error)
+	GetCreateUserFunc func(firstName, username string, telegramID int64) int64
 	GetInactivateUser func(userID int64) int64
 	GetActivateUser   func(userID int64) int64
 }
 
 //GetUserID is the mock client's `GetUserID` func
-func (m *UserModelClient) GetUserID(telegramID int) (int64, error) {
+func (m *UserModelClient) GetUserID(telegramID int64) (int64, error) {
 	return GetGetUserIDFunc(telegramID)
 }
 
 //CreateUser is the mock client's `CreateUser` func
-func (m *UserModelClient) CreateUser(firstName, username string, telegramID int) int64 {
+func (m *UserModelClient) CreateUser(firstName, username string, telegramID int64) int64 {
 	return GetCreateUserFunc(firstName, username, telegramID)
 }
 
@@ -29,8 +29,8 @@ func (m *UserModelClient) ActivateUser(userID int64) int64 {
 }
 
 var (
-	GetGetUserIDFunc  func(telegramID int) (int64, error)
-	GetCreateUserFunc func(firstName, username string, telegramID int) int64
+	GetGetUserIDFunc  func(telegramID int64) (int64, error)
+	GetCreateUserFunc func(firstName, username string, telegramID int64) int64
 	GetInactivateUser func(userID int64) int64
 	GetActivateUser   func(userID int64) int64
 )

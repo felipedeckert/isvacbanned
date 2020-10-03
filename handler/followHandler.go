@@ -28,6 +28,8 @@ func (f *FollowHandler) FollowHandler(m *tb.Message, bot *tb.Bot, steamID, currN
 	log.Printf("M=FollowHandler steamID=%v\n", steamID)
 	followersCount, err := FollowClient.GetFollowerCountBySteamID(steamID)
 
+	log.Printf("M=FollowHandler chatID=%v\n", m.Chat.ID)
+
 	UserModelClient.ActivateUser(userID)
 
 	if err != nil {
@@ -53,7 +55,7 @@ func (f *FollowHandler) FollowHandler(m *tb.Message, bot *tb.Bot, steamID, currN
 
 	message := getFollowResponse(currNickname, followersCount, followID, isVACBanned)
 
-	MsgClient.SendMessage(bot, m.Sender, message)
+	MsgClient.SendMessageToChat(bot, m.Chat, message)
 	return dbID
 }
 

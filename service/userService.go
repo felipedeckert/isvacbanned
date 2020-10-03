@@ -14,11 +14,11 @@ func init() {
 	userModelClient = &model.UserModel{}
 }
 
-func getUserID(user *tb.User) int64 {
-	log.Printf("M=getUserID telegramID=%v\n", user.ID)
-	id, err := userModelClient.GetUserID(user.ID)
+func getUserID(chat *tb.Chat) int64 {
+	log.Printf("M=getUserID telegramID=%v\n", chat.ID)
+	id, err := userModelClient.GetUserID(chat.ID)
 	if err != nil && err == sql.ErrNoRows {
-		id = userModelClient.CreateUser(user.FirstName, user.Username, user.ID)
+		id = userModelClient.CreateUser(chat.FirstName, chat.Username, chat.ID)
 	}
 
 	return id

@@ -1,8 +1,9 @@
 package handler
 
 import (
-	tb "gopkg.in/tucnak/telebot.v2"
 	"isvacbanned/model"
+
+	tb "gopkg.in/tucnak/telebot.v2"
 )
 
 var UserModelClient model.UserModelClient
@@ -17,7 +18,7 @@ func StopHandler(m *tb.Message, bot *tb.Bot, userID int64) {
 
 	message := getStopResponse()
 
-	bot.Send(m.Sender, message)
+	bot.Send(m.Chat, message)
 }
 
 func getStopResponse() string {

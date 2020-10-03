@@ -72,18 +72,21 @@ func setUpFollowHandler(m *tb.Message, bot *tb.Bot) int64 {
 }
 
 func setUpShowHandler(m *tb.Message, bot *tb.Bot) {
+	log.Printf("M=setUpShowHandler telegramID=%v\n", m.Chat.ID)
 	userID := getUserID(m.Chat)
 
 	handler.ShowHandler(m, bot, userID)
 }
 
 func setUpStopHandler(m *tb.Message, bot *tb.Bot) {
+	log.Printf("M=setUpStopHandler telegramID=%v\n", m.Chat.ID)
 	userID := getUserID(m.Chat)
 
 	handler.StopHandler(m, bot, userID)
 }
 
 func setUpStartHandler(m *tb.Message, bot *tb.Bot) {
+	log.Printf("M=setUpStartHandler telegramID=%v\n", m.Chat.ID)
 	handler.StartHandler(m, bot)
 }
 
@@ -91,7 +94,7 @@ func setUpUnfollowHandler(m *tb.Message, bot *tb.Bot) {
 	userID := getUserID(m.Chat)
 	steamID, err := getSteamID(m.Payload)
 
-	log.Printf("M=setUpUnfollowHandler steamID=%v\n", steamID)
+	log.Printf("M=setUpUnfollowHandler chatID=%v steamID=%v\n", m.Chat.ID, steamID)
 
 	if err != nil {
 		bot.Send(m.Chat, err.Error())

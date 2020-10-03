@@ -21,5 +21,6 @@ func getUserID(chat *tb.Chat) int64 {
 		id = userModelClient.CreateUser(chat.FirstName, chat.Username, chat.ID)
 	}
 
+	log.Printf("M=getUserID userID=%v\n", id)
 	return id
 }

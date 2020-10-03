@@ -2,6 +2,7 @@ package handler
 
 import (
 	"isvacbanned/model"
+	"log"
 	"strings"
 
 	tb "gopkg.in/tucnak/telebot.v2"
@@ -16,6 +17,8 @@ func init() {
 //ShowHandler handles show requests
 func ShowHandler(m *tb.Message, bot *tb.Bot, userID int64) {
 	followedUsers := followClient.GetUsersFollowed(userID)
+
+	log.Printf("M=ShowHandler userID=%v usersFollowedCount=%v\n", m.Chat.ID, len(followedUsers))
 
 	message := getShowResponse(followedUsers)
 

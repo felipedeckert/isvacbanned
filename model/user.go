@@ -6,6 +6,18 @@ import (
 
 type UserModel struct{}
 
+type UserModelInterface interface {
+	GetUserID(telegramID int64) (int64, error)
+
+	CreateUser(firstName, username string, telegramID int64) int64
+
+	InactivateUser(userID int64) int64
+
+	ActivateUser(userID int64) int64
+}
+
+var UserModelClient UserModelInterface = UserModel{}
+
 // GetUserID returns database user id for a telegram user id
 func (u UserModel) GetUserID(telegramID int64) (int64, error) {
 

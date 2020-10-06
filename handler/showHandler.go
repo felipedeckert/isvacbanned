@@ -10,15 +10,9 @@ import (
 
 const maxMessageLength int = 4000
 
-var followClient model.FollowModelClient
-
-func init() {
-	followClient = &model.FollowModel{}
-}
-
 //ShowHandler handles show requests
 func ShowHandler(m *tb.Message, bot *tb.Bot, userID int64) {
-	followedUsers := followClient.GetUsersFollowed(userID)
+	followedUsers := model.FollowModelClient.GetUsersFollowed(userID)
 
 	log.Printf("M=ShowHandler L=I userID=%v usersFollowedCount=%v\n", m.Chat.ID, len(followedUsers))
 

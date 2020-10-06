@@ -6,19 +6,15 @@ import (
 	"strings"
 )
 
-func getArgumentFromURL(url string) (string, error) {
-	if last := len(url) - 1; last >= 0 && url[last] == '/' {
-		url = url[:last]
-	}
+type urlService struct{}
 
-	splittedInput := strings.Split(url, "/")
-	if len(splittedInput) < 2 {
-		return "", errors.New("Invalid URL")
-	}
-	return splittedInput[len(splittedInput)-1], nil
+type UrlServiceInterface interface {
+	getSteamID(param string) (string, error)
 }
 
-func getSteamID(param string) (string, error) {
+var UrlServiceClient UrlServiceInterface = urlService{}
+
+func (u urlService) getSteamID(param string) (string, error) {
 	steamID := param
 	var err error
 	var customID string
@@ -54,4 +50,16 @@ func getSteamID(param string) (string, error) {
 	log.Printf("M=getSteamID input=%v argument=%v\n", param, steamID)
 
 	return steamID, nil
+}
+
+func getArgumentFromURL(url string) (string, error) {
+	if last := len(url) - 1; last >= 0 && url[last] == '/' {
+		url = url[:last]
+	}
+
+	splittedInput := strings.Split(url, "/")
+	if len(splittedInput) < 2 {
+		return "", errors.New("Invalid URL")
+	}
+	return splittedInput[len(splittedInput)-1], nil
 }

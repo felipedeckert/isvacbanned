@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"isvacbanned/messager"
+	"isvacbanned/messenger"
 	"isvacbanned/model"
 	"isvacbanned/util"
 
@@ -10,15 +10,16 @@ import (
 
 type UnfollowHandler struct{}
 
-func init() {
-	FollowClient = &model.FollowModel{}
-	MsgClient = &messager.MessageClient{}
+type UnfollowHandlerInterface interface {
+	HandleUnfollowRequest(m *tb.Message, bot *tb.Bot, steamID string, userID int64)
 }
 
-//UnfollowHandler handles a follow request
-func (f *UnfollowHandler) UnfollowHandler(m *tb.Message, bot *tb.Bot, steamID string, userID int64) {
+var UnfollowHandlerClient UnfollowHandlerInterface = UnfollowHandler{}
 
-	rows := FollowClient.UnfollowSteamUser(userID, steamID)
+//UnfollowHandler handles a follow request
+func (f UnfollowHandler) HandleUnfollowRequest(m *tb.Message, bot *tb.Bot, steamID string, userID int64) {
+
+	rows := model.FollowModelClient.UnfollowSteamUser(userID, steamID)
 
 	var message string
 
@@ -28,7 +29,7 @@ func (f *UnfollowHandler) UnfollowHandler(m *tb.Message, bot *tb.Bot, steamID st
 		message = getSuccessfulUnfollowResponse(steamID)
 	}
 
-	MsgClient.SendMessageToChat(bot, m.Chat, message)
+	messenger.MessengerClient.SendMessageToChat(bot, m.Chat, message)
 
 }
 

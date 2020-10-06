@@ -12,14 +12,6 @@ import (
 const playerBanned = "This player is VAC banned!"
 const playerNotBanned = "This player is NOT VAC banned!"
 
-var followHandler *handler.FollowHandler
-var unfollowHandler *handler.UnfollowHandler
-
-func init() {
-	followHandler = &handler.FollowHandler{}
-	unfollowHandler = &handler.UnfollowHandler{}
-}
-
 // SetUpBot sets up the bot configs and its handlers
 func SetUpBot(webhook *tb.Webhook, token string) {
 	pref := tb.Settings{
@@ -47,11 +39,13 @@ func setUpBotHandlers(bot *tb.Bot) {
 	bot.Handle("/stop", func(m *tb.Message) { setUpStopHandler(m, bot) })
 
 	bot.Handle("/start", func(m *tb.Message) { setUpStartHandler(m, bot) })
+
+	bot.Handle("/summary", func(m *tb.Message) { setUpSummaryHandler(m, bot) })
 }
 
 func setUpFollowHandler(m *tb.Message, bot *tb.Bot) int64 {
-	userID := getUserID(m.Chat)
-	steamID, err := getSteamID(m.Payload)
+	userID := UserServiceClient.getUserID(m.Chat)
+	steamID, err := UrlServiceClient.getSteamID(m.Payload)
 
 	log.Printf("M=setUpFollowHandler payload=%v userID=%v steamID=%v\n", m.Payload, userID, steamID)
 
@@ -63,24 +57,24 @@ func setUpFollowHandler(m *tb.Message, bot *tb.Bot) int64 {
 		return -1
 	}
 
-	currNickname := GetPlayerCurrentNickname(steamID)
+	currNickname := PlayerServiceClient.GetPlayerCurrentNickname(steamID)
 
-	player := GetPlayerStatus(steamID)
+	player := PlayerServiceClient.GetPlayerStatus(steamID)
 	playerData := player.Players[0]
 
-	return followHandler.FollowHandler(m, bot, steamID, currNickname, userID, playerData.VACBanned)
+	return handler.FollowHandlerClient.HandleFollowRequest(m, bot, steamID, currNickname, userID, playerData.VACBanned)
 }
 
 func setUpShowHandler(m *tb.Message, bot *tb.Bot) {
 	log.Printf("M=setUpShowHandler telegramID=%v\n", m.Chat.ID)
-	userID := getUserID(m.Chat)
+	userID := UserServiceClient.getUserID(m.Chat)
 
 	handler.ShowHandler(m, bot, userID)
 }
 
 func setUpStopHandler(m *tb.Message, bot *tb.Bot) {
 	log.Printf("M=setUpStopHandler telegramID=%v\n", m.Chat.ID)
-	userID := getUserID(m.Chat)
+	userID := UserServiceClient.getUserID(m.Chat)
 
 	handler.StopHandler(m, bot, userID)
 }
@@ -91,8 +85,8 @@ func setUpStartHandler(m *tb.Message, bot *tb.Bot) {
 }
 
 func setUpUnfollowHandler(m *tb.Message, bot *tb.Bot) {
-	userID := getUserID(m.Chat)
-	steamID, err := getSteamID(m.Payload)
+	userID := UserServiceClient.getUserID(m.Chat)
+	steamID, err := UrlServiceClient.getSteamID(m.Payload)
 
 	log.Printf("M=setUpUnfollowHandler chatID=%v steamID=%v\n", m.Chat.ID, steamID)
 
@@ -104,7 +98,14 @@ func setUpUnfollowHandler(m *tb.Message, bot *tb.Bot) {
 		return
 	}
 
-	unfollowHandler.UnfollowHandler(m, bot, steamID, userID)
+	handler.UnfollowHandlerClient.HandleUnfollowRequest(m, bot, steamID, userID)
+}
+
+func setUpSummaryHandler(m *tb.Message, bot *tb.Bot) {
+	log.Printf("M=setUpSummaryHandler telegramID=%v\n", m.Chat.ID)
+	userID := UserServiceClient.getUserID(m.Chat)
+
+	handler.HandleSummaryRequest(m, bot, userID)
 }
 
 func isNumeric(s string) bool {

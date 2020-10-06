@@ -1,49 +1,36 @@
 package service
 
 import (
-	"database/sql"
 	"testing"
 
-	"isvacbanned/mock"
+	"isvacbanned/model"
 
 	"github.com/stretchr/testify/assert"
 	tb "gopkg.in/tucnak/telebot.v2"
 )
 
 func init() {
-	userModelClient = &mock.UserModelClient{}
+	model.UserModelClient = model.UserMock{}
 }
 
 func TestGetUserIDAlreadyCreated(t *testing.T) {
 
-	userID := int64(123)
+	userID := int64(321)
 
-	user := tb.Chat{ID: 123, FirstName: "Gabriel", Username: "fallen"}
+	user := tb.Chat{ID: 321, FirstName: "Gabriel", Username: "fallen"}
 
-	mock.GetGetUserIDFunc = func(telegramID int64) (int64, error) {
-		return userID, nil
-	}
-
-	result := getUserID(&user)
+	result := UserServiceClient.getUserID(&user)
 
 	assert.EqualValues(t, userID, result)
 }
 
 func TestGetUserIDNewUser(t *testing.T) {
 
-	userID := int64(123)
+	userID := int64(321)
 
-	user := tb.Chat{ID: 123, FirstName: "Gabriel", Username: "fallen"}
+	user := tb.Chat{ID: 321, FirstName: "Gabriel", Username: "fallen"}
 
-	mock.GetGetUserIDFunc = func(telegramID int64) (int64, error) {
-		return int64(-1), sql.ErrNoRows
-	}
-
-	mock.GetCreateUserFunc = func(firstName, username string, telegramID int64) int64 {
-		return userID
-	}
-
-	result := getUserID(&user)
+	result := UserServiceClient.getUserID(&user)
 
 	assert.EqualValues(t, userID, result)
 }

@@ -3,7 +3,7 @@ package handler
 import (
 	"database/sql"
 	"fmt"
-	"isvacbanned/messager"
+	"isvacbanned/messenger"
 	"isvacbanned/model"
 	"log"
 
@@ -12,25 +12,20 @@ import (
 
 type FollowHandler struct{}
 
-var (
-	FollowClient model.FollowModelClient
-	MsgClient    MessageClient
-)
-
-func init() {
-	UserModelClient = &model.UserModel{}
-	FollowClient = &model.FollowModel{}
-	MsgClient = &messager.MessageClient{}
+type FollowHandlerInterface interface {
+	HandleFollowRequest(m *tb.Message, bot *tb.Bot, steamID, currNickname string, userID int64, isVACBanned bool) int64
 }
 
-//FollowHandler handles a follow request
-func (f *FollowHandler) FollowHandler(m *tb.Message, bot *tb.Bot, steamID, currNickname string, userID int64, isVACBanned bool) int64 {
-	log.Printf("M=FollowHandler steamID=%v\n", steamID)
-	followersCount, err := FollowClient.GetFollowerCountBySteamID(steamID)
+var FollowHandlerClient FollowHandlerInterface = FollowHandler{}
 
-	log.Printf("M=FollowHandler chatID=%v\n", m.Chat.ID)
+//HandleFollowRequest handles a follow request
+func (f FollowHandler) HandleFollowRequest(m *tb.Message, bot *tb.Bot, steamID, currNickname string, userID int64, isVACBanned bool) int64 {
+	log.Printf("M=HandleFollowRequest steamID=%v\n", steamID)
+	followersCount, err := model.FollowModelClient.GetFollowerCountBySteamID(steamID)
 
-	UserModelClient.ActivateUser(userID)
+	log.Printf("M=HandleFollowRequest chatID=%v\n", m.Chat.ID)
+
+	model.UserModelClient.ActivateUser(userID)
 
 	if err != nil {
 		panic(err)
@@ -38,7 +33,7 @@ func (f *FollowHandler) FollowHandler(m *tb.Message, bot *tb.Bot, steamID, currN
 
 	var dbID int64
 
-	followID, err := FollowClient.IsFollowed(steamID, userID)
+	followID, err := model.FollowModelClient.IsFollowed(steamID, userID)
 	if err != nil && err != sql.ErrNoRows {
 		panic(err)
 	}
@@ -46,16 +41,17 @@ func (f *FollowHandler) FollowHandler(m *tb.Message, bot *tb.Bot, steamID, currN
 	updateID := followID
 
 	if followID == 0 {
-		dbID = FollowClient.FollowSteamUser(m.Chat.ID, steamID, currNickname, userID)
+		dbID = model.FollowModelClient.FollowSteamUser(m.Chat.ID, steamID, currNickname, userID)
 		updateID = dbID
 	}
 	if isVACBanned {
-		FollowClient.SetFollowedUserToCompleted([]int64{updateID})
+		model.FollowModelClient.SetFollowedUserToCompleted([]int64{updateID})
 	}
 
-	message := getFollowResponse(currNickname, followersCount, followID, isVACBanned)
+	response := getFollowResponse(currNickname, followersCount, followID, isVACBanned)
 
-	MsgClient.SendMessageToChat(bot, m.Chat, message)
+	messenger.MessengerClient.SendMessageToChat(bot, m.Chat, response)
+
 	return dbID
 }
 

@@ -1,28 +1,16 @@
 package job
 
 import (
+	"isvacbanned/messenger"
 	"isvacbanned/model"
 	"isvacbanned/service"
 	"isvacbanned/util"
 	"log"
-	"net/http"
-	"os"
 	"strconv"
 	"time"
 
 	"github.com/go-co-op/gocron"
 )
-
-const telegramAPIURL = "https://api.telegram.org/bot"
-const telegramMethod = "/sendMessage"
-const telegramChatIDParam = "?chat_id="
-const telegramTextParam = "&text="
-
-var followModelClient *model.FollowModel
-
-func init() {
-	followModelClient = &model.FollowModel{}
-}
 
 // RunScheduler sets up the scheduler to check users status
 func RunScheduler() {
@@ -36,73 +24,62 @@ func RunScheduler() {
 }
 
 func checkFollownUsersBan() {
-	usersIncompleted := followModelClient.GetAllIncompletedFollowedUsers()
+	usersIncompleted := model.FollowModelClient.GetAllIncompletedFollowedUsers()
 	var usersToComplete []int64
 	for chatID, steamIDList := range usersIncompleted {
 		for _, users := range steamIDList {
-			usersToComplete = append(usersToComplete, hasPlayerBeenBanned(users, chatID)...)
+			usersToComplete = append(usersToComplete, validateBanStatusAndSendMessage(users, chatID)...)
 		}
 	}
 	if len(usersToComplete) > 0 {
 		//Once a player status is set to completed, this player will not be returned in the GetAllIncompletedFollowedUsers query
-		followModelClient.SetFollowedUserToCompleted(usersToComplete)
+		model.FollowModelClient.SetFollowedUserToCompleted(usersToComplete)
 	}
 
 	log.Printf("M=checkFollownUsersBan usersToCompleteCount=%v\n", len(usersToComplete))
 }
 
 func checkFollownUsersNickname() {
-	usersIncompleted := followModelClient.GetAllIncompletedFollowedUsers()
+	usersIncompleted := model.FollowModelClient.GetAllIncompletedFollowedUsers()
 
 	for chatID, steamIDList := range usersIncompleted {
 		for _, users := range steamIDList {
-			hasPlayerChangedNickname(users, chatID)
+			validateNicknameAndSendMessage(users, chatID)
 		}
 	}
 }
 
-func hasPlayerBeenBanned(user model.UsersFollowed, chatID int64) []int64 {
+func validateBanStatusAndSendMessage(user model.UsersFollowed, chatID int64) []int64 {
 	idsToUpdate := make([]int64, 0)
-	player := service.GetPlayerStatus(user.SteamID)
+	player := service.PlayerServiceClient.GetPlayerStatus(user.SteamID)
 	playerData := player.Players[0]
 
 	if playerData.VACBanned {
-		actualNickname := service.GetPlayerCurrentNickname(user.SteamID)
-		log.Printf("M=hasPlayerBeenBanned steamID=%v status=banned\n", user.SteamID)
-		sendMessageToUser(buildBanMessage(user.OldNickname, actualNickname, user.SteamID, playerData.DaysSinceLastBan), chatID)
+		actualNickname := service.PlayerServiceClient.GetPlayerCurrentNickname(user.SteamID)
+		log.Printf("M=validateBanStatusAndSendMessage steamID=%v status=banned\n", user.SteamID)
+		messenger.MessengerClient.SendMessageToUser(buildBanMessage(user.OldNickname, actualNickname, user.SteamID, playerData.DaysSinceLastBan), chatID)
 		idsToUpdate = append(idsToUpdate, user.ID)
 	}
 	return idsToUpdate
 }
 
-func hasPlayerChangedNickname(user model.UsersFollowed, chatID int64) {
-	actualNickname := service.GetPlayerCurrentNickname(user.SteamID)
+func validateNicknameAndSendMessage(user model.UsersFollowed, chatID int64) {
+	actualNickname := service.PlayerServiceClient.GetPlayerCurrentNickname(user.SteamID)
 
 	if user.CurrNickname != actualNickname {
-		log.Printf("M=hasPlayerBeenBanned steamID=%v status=changedNickname\n", user.SteamID)
-		followModelClient.SetCurrNickname(user.ID, actualNickname)
-		sendMessageToUser(buildNicknameChangedMessage(user.OldNickname, actualNickname, user.SteamID), chatID)
+		log.Printf("M=validateNicknameAndSendMessage steamID=%v status=changedNickname\n", user.SteamID)
+		model.FollowModelClient.SetCurrNickname(user.ID, actualNickname)
+		messenger.MessengerClient.SendMessageToUser(buildNicknameChangedMessage(user.OldNickname, user.CurrNickname, actualNickname, user.SteamID), chatID)
 	}
 }
 
-func sendMessageToUser(message string, chatID int64) {
-	var token string
-
-	if util.LOCAL {
-		token = "1324910657:AAFSlJn6TD9EeYNn35MEo-YphYlhYhqc_do"
-	} else {
-		token = os.Getenv("TOKEN")
+func buildNicknameChangedMessage(oldNickname, recentNickname, currNickname, steamID string) string {
+	diffRecentNickname := ""
+	if oldNickname != recentNickname {
+		diffRecentNickname = ", recently playing as \"" + recentNickname + "\""
 	}
 
-	sendMessageURL := telegramAPIURL + token + telegramMethod + telegramChatIDParam + strconv.FormatInt(chatID, 10) + telegramTextParam + message
-	_, err := http.Get(sendMessageURL)
-	if err != nil {
-		panic(err)
-	}
-}
-
-func buildNicknameChangedMessage(oldNickname, currNickname, steamID string) string {
-	return "The user you followed as " + oldNickname + " Steam Profile: " + util.SteamProfileURL + steamID + " is now under the nickname " + currNickname
+	return "The user you followed as \"" + oldNickname + "\"" + diffRecentNickname + ", Steam Profile: " + util.SteamProfileURL + steamID + ", is now under the nickname \"" + currNickname + "\""
 }
 
 func buildBanMessage(oldNickname, currNickname, steamID string, daysSinceLastBan int) string {

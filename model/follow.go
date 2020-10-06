@@ -12,6 +12,20 @@ import (
 
 type FollowModel struct{}
 
+type FollowModelInterface interface {
+	FollowSteamUser(chatID int64, steamID, currNickname string, userID int64) int64
+	UnfollowSteamUser(userID int64, steamID string) int64
+	GetFollowerCountBySteamID(steamID string) (int64, error)
+	GetAllIncompletedFollowedUsers() map[int64][]UsersFollowed
+	GetUsersFollowed(userID int64) []UsersFollowed
+	SetCurrNickname(userID int64, sanitizedActualNickname string)
+	SetFollowedUserToCompleted(id []int64) int64
+	GetUsersFollowedSummary(userID int64) map[bool]int
+	IsFollowed(steamID string, userID int64) (int64, error)
+}
+
+var FollowModelClient FollowModelInterface = FollowModel{}
+
 type UsersFollowed struct {
 	ID           int64
 	SteamID      string
@@ -21,7 +35,7 @@ type UsersFollowed struct {
 }
 
 // FollowSteamUser links a telegram user to a steam user which is being followed
-func (f *FollowModel) FollowSteamUser(chatID int64, steamID, currNickname string, userID int64) int64 {
+func (f FollowModel) FollowSteamUser(chatID int64, steamID, currNickname string, userID int64) int64 {
 
 	stmt, err := util.GetDatabase().Prepare("INSERT INTO follow(chat_id, steam_id, user_id, old_nickname, curr_nickname) VALUES(?, ?, ?, ?, ?)")
 
@@ -45,7 +59,7 @@ func (f *FollowModel) FollowSteamUser(chatID int64, steamID, currNickname string
 }
 
 // UnfollowSteamUser sets a followed player flag is_active to false
-func (f *FollowModel) UnfollowSteamUser(userID int64, steamID string) int64 {
+func (f FollowModel) UnfollowSteamUser(userID int64, steamID string) int64 {
 
 	stmt, err := util.GetDatabase().Prepare("UPDATE follow SET is_active = false where user_id = ? AND steam_id = ?")
 
@@ -69,7 +83,7 @@ func (f *FollowModel) UnfollowSteamUser(userID int64, steamID string) int64 {
 }
 
 //GetFollowerCountBySteamID get the number of followers of a steam player
-func (f *FollowModel) GetFollowerCountBySteamID(steamID string) (int64, error) {
+func (f FollowModel) GetFollowerCountBySteamID(steamID string) (int64, error) {
 
 	row := util.GetDatabase().QueryRow(
 		"SELECT COUNT(f.id) as count"+
@@ -84,7 +98,7 @@ func (f *FollowModel) GetFollowerCountBySteamID(steamID string) (int64, error) {
 }
 
 //GetAllIncompletedFollowedUsers get all fallowed steam user for every telegram user
-func (f *FollowModel) GetAllIncompletedFollowedUsers() map[int64][]UsersFollowed {
+func (f FollowModel) GetAllIncompletedFollowedUsers() map[int64][]UsersFollowed {
 
 	rows, err := util.GetDatabase().Query("SELECT id, chat_id, steam_id, old_nickname, curr_nickname FROM follow WHERE is_completed <> true AND is_active = true")
 
@@ -119,7 +133,7 @@ func (f *FollowModel) GetAllIncompletedFollowedUsers() map[int64][]UsersFollowed
 }
 
 //GetUsersFollowed gets a slice os the nicknames (the old ones) of players followed by a user
-func (f *FollowModel) GetUsersFollowed(userID int64) []UsersFollowed {
+func (f FollowModel) GetUsersFollowed(userID int64) []UsersFollowed {
 
 	rows, err := util.GetDatabase().Query("SELECT old_nickname, is_completed FROM follow WHERE user_id = ?", userID)
 
@@ -150,7 +164,7 @@ func (f *FollowModel) GetUsersFollowed(userID int64) []UsersFollowed {
 }
 
 //SetCurrNickname updates de curr_nickname of a given player
-func (f *FollowModel) SetCurrNickname(userID int64, sanitizedActualNickname string) {
+func (f FollowModel) SetCurrNickname(userID int64, sanitizedActualNickname string) {
 
 	stmt, err := util.GetDatabase().Prepare("UPDATE follow SET curr_nickname = ? where id = ?")
 
@@ -168,7 +182,7 @@ func (f *FollowModel) SetCurrNickname(userID int64, sanitizedActualNickname stri
 }
 
 // SetFollowedUserToCompleted sets a player status to completed, and it will not be followed anymore
-func (f *FollowModel) SetFollowedUserToCompleted(id []int64) int64 {
+func (f FollowModel) SetFollowedUserToCompleted(id []int64) int64 {
 
 	stmt, err := util.GetDatabase().Prepare("UPDATE follow SET is_completed = true where id in(?)")
 
@@ -191,8 +205,43 @@ func (f *FollowModel) SetFollowedUserToCompleted(id []int64) int64 {
 	return lastID
 }
 
+// GetUsersFollowedSummary returns a summary of players followed, separated by ban status
+func (f FollowModel) GetUsersFollowedSummary(userID int64) map[bool]int {
+
+	rows, err := util.GetDatabase().Query(
+		"SELECT COUNT(id) as count, is_completed"+
+			"	FROM follow"+
+			"	WHERE user_id = ?"+
+			"	GROUP BY is_completed", userID)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+
+	summary := make(map[bool]int, 0)
+	for rows.Next() {
+		var (
+			count       int
+			isCompleted bool
+		)
+
+		if err = rows.Scan(&count, &isCompleted); err != nil {
+			if err != sql.ErrNoRows {
+				panic(err.Error())
+			}
+
+			return nil
+		}
+
+		summary[isCompleted] = count
+	}
+
+	return summary
+}
+
 // IsFollowed checks if a user already follows a player
-func (f *FollowModel) IsFollowed(steamID string, userID int64) (int64, error) {
+func (f FollowModel) IsFollowed(steamID string, userID int64) (int64, error) {
 
 	row := util.GetDatabase().QueryRow("SELECT id FROM follow WHERE steam_id = ? AND user_id = ?", steamID, userID)
 

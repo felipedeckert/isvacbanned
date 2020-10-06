@@ -6,15 +6,9 @@ import (
 	tb "gopkg.in/tucnak/telebot.v2"
 )
 
-var UserModelClient model.UserModelClient
-
-func init() {
-	UserModelClient = &model.UserModel{}
-}
-
 //StopHandler handles show requests
 func StopHandler(m *tb.Message, bot *tb.Bot, userID int64) {
-	UserModelClient.InactivateUser(userID)
+	model.UserModelClient.InactivateUser(userID)
 
 	message := getStopResponse()
 

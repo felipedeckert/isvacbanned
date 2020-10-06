@@ -4,7 +4,9 @@ import (
 	"bytes"
 	"io/ioutil"
 	"isvacbanned/handler"
+	"isvacbanned/messenger"
 	"isvacbanned/mock"
+	"isvacbanned/model"
 	"net/http"
 	"testing"
 
@@ -12,13 +14,18 @@ import (
 	tb "gopkg.in/tucnak/telebot.v2"
 )
 
-func init() {
-	userModelClient = &mock.UserModelClient{}
-	handler.FollowClient = &mock.FollowModelClient{}
-	handler.MsgClient = &mock.MsgClient{}
+func initMocks() {
+	UserServiceClient = UserServiceMock{}
+	UrlServiceClient = UrlServiceMock{}
+	PlayerServiceClient = PlayerServiceMock{}
+	handler.FollowHandlerClient = handler.FollowHandlerMock{}
+	messenger.MessengerClient = messenger.MessengerMock{}
+	model.FollowModelClient = model.FollowMock{}
+	model.UserModelClient = model.UserMock{}
 }
 
 func TestSetUpFollowHandler(t *testing.T) {
+	initMocks()
 
 	user := tb.User{ID: 123, FirstName: "Gabriel", Username: "fallen"}
 
@@ -26,10 +33,6 @@ func TestSetUpFollowHandler(t *testing.T) {
 
 	msg := tb.Message{Sender: &user, Payload: "12345678901234567", Chat: &chat}
 	bot := tb.Bot{}
-
-	mock.GetGetUserIDFunc = func(telegramID int64) (int64, error) {
-		return 123, nil
-	}
 
 	// build response JSON
 	myJSON := `{ "response" : { "players" : [ { "personaname" : "fallen" } ] } }`
@@ -43,17 +46,7 @@ func TestSetUpFollowHandler(t *testing.T) {
 		}, nil
 	}
 
-	expectedResult := int64(321)
-
-	mock.GetGetFollowerCountBySteamID = func(steamID string) (int64, error) {
-		return 7, nil
-	}
-
-	mock.GetFollowSteamUser = func(chatID int64, steamID, currNickname string, userID int64) int64 {
-		return expectedResult
-	}
-
-	mock.GetSendMessageToChat = func(bot *tb.Bot, user *tb.Chat, message string) {}
+	expectedResult := int64(456)
 
 	dbID := setUpFollowHandler(&msg, &bot)
 

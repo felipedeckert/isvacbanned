@@ -55,6 +55,15 @@ type Player struct {
 	Players []playerData `json:"players"`
 }
 
+type playerService struct{}
+
+type PlayerServiceInterface interface {
+	GetPlayerStatus(steamID string) Player
+	GetPlayerCurrentNickname(steamID string) string
+}
+
+var PlayerServiceClient PlayerServiceInterface = playerService{}
+
 func init() {
 	Client = &http.Client{}
 }
@@ -98,6 +107,7 @@ func unmarshalSteamID(str []byte) (string, error) {
 	return playerID.Response.SteamId, nil
 }
 
+/*
 func getAllPlayersStatus(userSteamID map[string]string) map[string]Player {
 	log.Printf("M=getAllPlayersStatus")
 	players := make(map[string]Player)
@@ -106,9 +116,10 @@ func getAllPlayersStatus(userSteamID map[string]string) map[string]Player {
 	}
 	return players
 }
+*/
 
 // GetPlayerStatus receives a steamID and returns its player ban status
-func GetPlayerStatus(steamID string) Player {
+func (p playerService) GetPlayerStatus(steamID string) Player {
 	url := buildGetURL(steamID)
 	log.Printf("M=getPlayerStatus url=%v\n", url)
 	resp, err := Client.Get(url)
@@ -154,7 +165,7 @@ func getPlayerSteamID(playerName string) (string, error) {
 }
 
 // GetPlayerCurrentNickname gets the player identified by steamID current nickname
-func GetPlayerCurrentNickname(steamID string) string {
+func (p playerService) GetPlayerCurrentNickname(steamID string) string {
 	url := buildGetPlayerSummaryURL(steamID)
 	log.Printf("M=getPLayerCurrentNickname steamID=%v\n", steamID)
 	resp, err := Client.Get(url)
@@ -197,6 +208,7 @@ func buildGetURL(steamID string) string {
 	return vacBanURL + valveKey + steamIDParamKey + steamID
 }
 
+/*
 //UpdatePlayersStatus updates players status on given spreadsheet
 func UpdatePlayersStatus(spreadsheetID string) {
 	log.Printf("M=UpdatePlayersStatus spreadsheetID=%v\n", spreadsheetID)
@@ -207,3 +219,4 @@ func UpdatePlayersStatus(spreadsheetID string) {
 
 	updatePlayersIfNeeded(players, spreadsheetID)
 }
+*/

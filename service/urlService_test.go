@@ -51,7 +51,7 @@ func TestGetSteamIDInvalidURL(t *testing.T) {
 	lastParam := "third"
 	myURL := "http://first.com/second/" + lastParam
 
-	_, err := getSteamID(myURL)
+	_, err := UrlServiceClient.getSteamID(myURL)
 
 	if err == nil {
 		t.Errorf("Expected error, but no error returned")
@@ -62,7 +62,7 @@ func TestGetSteamID(t *testing.T) {
 	expectedParam := "third"
 	myURL := "http://first.com/profile/" + expectedParam
 
-	res, err := getSteamID(myURL)
+	res, err := UrlServiceClient.getSteamID(myURL)
 
 	assert.Nil(t, err)
 
@@ -87,7 +87,7 @@ func TestGetSteamIDFromCustomIDURL(t *testing.T) {
 		}, nil
 	}
 
-	res, err := getSteamID(myURL)
+	res, err := UrlServiceClient.getSteamID(myURL)
 
 	assert.Nil(t, err)
 

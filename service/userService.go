@@ -8,17 +8,19 @@ import (
 	tb "gopkg.in/tucnak/telebot.v2"
 )
 
-var userModelClient model.UserModelClient
+type userService struct{}
 
-func init() {
-	userModelClient = &model.UserModel{}
+type UserServiceInterface interface {
+	getUserID(chat *tb.Chat) int64
 }
 
-func getUserID(chat *tb.Chat) int64 {
+var UserServiceClient UserServiceInterface = userService{}
+
+func (u userService) getUserID(chat *tb.Chat) int64 {
 	log.Printf("M=getUserID telegramID=%v\n", chat.ID)
-	id, err := userModelClient.GetUserID(chat.ID)
+	id, err := model.UserModelClient.GetUserID(chat.ID)
 	if err != nil && err == sql.ErrNoRows {
-		id = userModelClient.CreateUser(chat.FirstName, chat.Username, chat.ID)
+		id = model.UserModelClient.CreateUser(chat.FirstName, chat.Username, chat.ID)
 	}
 
 	log.Printf("M=getUserID userID=%v\n", id)

@@ -24,5 +24,6 @@ func getStartResponse(username string) string {
 		"/unfollow <argument>: disables notifications about a specific player;\n"+
 		"<argument> MUST be either a Steam ID or Custom ID!\n\n"+
 		"/show : displays a list of every player you're following with its BAN status;\n\n"+
-		"Consider donating to help keep this service up and running: linkToPaypal.com", username)
+		"/summary : displays the summary of the players you follow with performance percentage;\n\n"+
+		"Consider donating to help keep this service up and running: TBA", username)
 }

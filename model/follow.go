@@ -212,6 +212,7 @@ func (f FollowModel) GetUsersFollowedSummary(userID int64) map[bool]int {
 		"SELECT COUNT(id) as count, is_completed"+
 			"	FROM follow"+
 			"	WHERE user_id = ?"+
+			"	AND is_active = 1"+
 			"	GROUP BY is_completed", userID)
 
 	if err != nil {

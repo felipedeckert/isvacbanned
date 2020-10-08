@@ -58,11 +58,14 @@ func setUpFollowHandler(m *tb.Message, bot *tb.Bot) int64 {
 	}
 
 	currNickname := PlayerServiceClient.GetPlayerCurrentNickname(steamID)
-
 	player := PlayerServiceClient.GetPlayerStatus(steamID)
-	playerData := player.Players[0]
 
-	return handler.FollowHandlerClient.HandleFollowRequest(m, bot, steamID, currNickname, userID, playerData.VACBanned)
+	if len(player.Players) > 0 && currNickname != "" {
+		playerData := player.Players[0]
+
+		return handler.FollowHandlerClient.HandleFollowRequest(m, bot, steamID, currNickname, userID, playerData.VACBanned)
+	}
+	return -1
 }
 
 func setUpShowHandler(m *tb.Message, bot *tb.Bot) {

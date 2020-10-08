@@ -52,13 +52,17 @@ func checkFollownUsersNickname() {
 func validateBanStatusAndSendMessage(user model.UsersFollowed, chatID int64) []int64 {
 	idsToUpdate := make([]int64, 0)
 	player := service.PlayerServiceClient.GetPlayerStatus(user.SteamID)
-	playerData := player.Players[0]
+	if len(player.Players) > 0 {
 
-	if playerData.VACBanned {
-		actualNickname := service.PlayerServiceClient.GetPlayerCurrentNickname(user.SteamID)
-		log.Printf("M=validateBanStatusAndSendMessage steamID=%v status=banned\n", user.SteamID)
-		messenger.MessengerClient.SendMessageToUser(buildBanMessage(user.OldNickname, actualNickname, user.SteamID, playerData.DaysSinceLastBan), chatID)
-		idsToUpdate = append(idsToUpdate, user.ID)
+		playerData := player.Players[0]
+		if playerData.VACBanned {
+			actualNickname := service.PlayerServiceClient.GetPlayerCurrentNickname(user.SteamID)
+			if actualNickname != "" {
+				log.Printf("M=validateBanStatusAndSendMessage steamID=%v status=banned\n", user.SteamID)
+				messenger.MessengerClient.SendMessageToUser(buildBanMessage(user.OldNickname, actualNickname, user.SteamID, playerData.DaysSinceLastBan), chatID)
+				idsToUpdate = append(idsToUpdate, user.ID)
+			}
+		}
 	}
 	return idsToUpdate
 }

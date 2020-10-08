@@ -167,11 +167,10 @@ func getPlayerSteamID(playerName string) (string, error) {
 // GetPlayerCurrentNickname gets the player identified by steamID current nickname
 func (p playerService) GetPlayerCurrentNickname(steamID string) string {
 	url := buildGetPlayerSummaryURL(steamID)
-	log.Printf("M=getPLayerCurrentNickname steamID=%v\n", steamID)
 	resp, err := Client.Get(url)
 
 	if err != nil {
-		log.Printf("M=getPlayerSteamID err=%s\n", err)
+		log.Printf("M=GetPlayerCurrentNickname err=%s\n", err)
 		log.Fatal(err)
 	}
 
@@ -187,6 +186,13 @@ func (p playerService) GetPlayerCurrentNickname(steamID string) string {
 
 	if err != nil {
 		panic(err)
+	}
+
+	if len(playerNickname.Response.Players) == 0 {
+		log.Printf("M=GetPlayerCurrentNickname status=404 steamID=%v\n", steamID)
+		return ""
+	} else {
+		log.Printf("M=GetPlayerCurrentNickname status=200 steamID=%v\n", steamID)
 	}
 
 	return playerNickname.Response.Players[0].Personaname

@@ -100,7 +100,13 @@ func (f FollowModel) GetFollowerCountBySteamID(steamID string) (int64, error) {
 //GetAllIncompletedFollowedUsers get all fallowed steam user for every telegram user
 func (f FollowModel) GetAllIncompletedFollowedUsers() map[int64][]UsersFollowed {
 
-	rows, err := util.GetDatabase().Query("SELECT id, chat_id, steam_id, old_nickname, curr_nickname FROM follow WHERE is_completed <> true AND is_active = true")
+	rows, err := util.GetDatabase().Query("SELECT id, chat_id, steam_id, old_nickname, curr_nickname " +
+		"FROM follow f " +
+		"JOIN user u " +
+		"ON f.user_id = u.id " +
+		"WHERE f.is_completed <> true " +
+		"AND f.is_active = true " +
+		"AND u.is_active = true")
 
 	if err != nil {
 		log.Fatal(err)

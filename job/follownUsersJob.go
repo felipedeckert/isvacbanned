@@ -6,7 +6,6 @@ import (
 	"isvacbanned/service"
 	"isvacbanned/util"
 	"log"
-	"strconv"
 	"time"
 
 	"github.com/go-co-op/gocron"
@@ -59,7 +58,7 @@ func validateBanStatusAndSendMessage(user model.UsersFollowed, chatID int64) []i
 			actualNickname := service.PlayerServiceClient.GetPlayerCurrentNickname(user.SteamID)
 			if actualNickname != "" {
 				log.Printf("M=validateBanStatusAndSendMessage steamID=%v status=banned\n", user.SteamID)
-				messenger.MessengerClient.SendMessageToUser(buildBanMessage(user.OldNickname, actualNickname, user.SteamID, playerData.DaysSinceLastBan), chatID)
+				messenger.MessengerClient.SendMessageToUser(util.GetBanMessage(user.OldNickname, actualNickname, user.SteamID, playerData.DaysSinceLastBan), chatID)
 				idsToUpdate = append(idsToUpdate, user.ID)
 			}
 		}
@@ -73,24 +72,6 @@ func validateNicknameAndSendMessage(user model.UsersFollowed, chatID int64) {
 	if user.CurrNickname != actualNickname {
 		log.Printf("M=validateNicknameAndSendMessage steamID=%v status=changedNickname\n", user.SteamID)
 		model.FollowModelClient.SetCurrNickname(user.ID, actualNickname)
-		messenger.MessengerClient.SendMessageToUser(buildNicknameChangedMessage(user.OldNickname, user.CurrNickname, actualNickname, user.SteamID), chatID)
+		messenger.MessengerClient.SendMessageToUser(util.GetNicknameChangedMessage(user.OldNickname, user.CurrNickname, actualNickname, user.SteamID), chatID)
 	}
-}
-
-func buildNicknameChangedMessage(oldNickname, recentNickname, currNickname, steamID string) string {
-	diffRecentNickname := ""
-	if oldNickname != recentNickname {
-		diffRecentNickname = ", recently playing as \"" + recentNickname + "\""
-	}
-
-	return "The user you followed as \"" + oldNickname + "\"" + diffRecentNickname + ", Steam Profile: " + util.SteamProfileURL + steamID + ", is now under the nickname \"" + currNickname + "\""
-}
-
-func buildBanMessage(oldNickname, currNickname, steamID string, daysSinceLastBan int) string {
-	// if the player hasn't changed nickname no reason to return redundant message
-	changedNickPhrase := ""
-	if oldNickname != currNickname {
-		changedNickPhrase = ", now under the nickname " + currNickname
-	}
-	return "The user you followed as " + oldNickname + changedNickPhrase + ", Steam Profile: " + util.SteamProfileURL + steamID + ", has been BANNED " + strconv.Itoa(daysSinceLastBan) + " days ago! You won't be notified about this player anymore."
 }

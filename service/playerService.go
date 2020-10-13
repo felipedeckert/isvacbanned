@@ -4,16 +4,11 @@ import (
 	"encoding/json"
 	"errors"
 	"io/ioutil"
+	"isvacbanned/util"
 	"log"
 	"net/http"
 )
 
-const valveKey = "DD5F4C5D083B1C9F7AB2CCAC76124DEC"
-const vacBanURL = "http://api.steampowered.com/ISteamUser/GetPlayerBans/v1/?key="
-const userURL = "http://api.steampowered.com/ISteamUser/ResolveVanityURL/v0001/?key="
-const playerSummaryURL = "http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key="
-const userParamKey = "&vanityurl="
-const steamIDParamKey = "&steamids="
 const noMatch int = 42
 
 var Client HTTPClient
@@ -120,7 +115,7 @@ func getAllPlayersStatus(userSteamID map[string]string) map[string]Player {
 
 // GetPlayerStatus receives a steamID and returns its player ban status
 func (p playerService) GetPlayerStatus(steamID string) Player {
-	url := buildGetURL(steamID)
+	url := util.GetVACBanURL(steamID)
 	log.Printf("M=getPlayerStatus url=%v\n", url)
 	resp, err := Client.Get(url)
 
@@ -138,20 +133,20 @@ func (p playerService) GetPlayerStatus(steamID string) Player {
 }
 
 func getPlayerSteamID(playerName string) (string, error) {
-	url := buildGetUserURL(playerName)
+	url := util.GetNicknameURL(playerName)
 	log.Printf("M=getPlayerSteamID playerName=%v\n", playerName)
 	resp, err := Client.Get(url)
 
 	if err != nil {
 		log.Printf("M=getPlayerSteamID step=get err=%s\n", err)
-		return "", errors.New("Unable to get player!")
+		return "", errors.New("unable to get player")
 	}
 
 	result, err := ioutil.ReadAll(resp.Body)
 	defer resp.Body.Close()
 	if err != nil {
 		log.Printf("M=getPlayerSteamID step=parse err=%s\n", err)
-		return "", errors.New("Unable to parse player!")
+		return "", errors.New("unable to parse player")
 	}
 
 	res, err := unmarshalSteamID(result)
@@ -166,7 +161,7 @@ func getPlayerSteamID(playerName string) (string, error) {
 
 // GetPlayerCurrentNickname gets the player identified by steamID current nickname
 func (p playerService) GetPlayerCurrentNickname(steamID string) string {
-	url := buildGetPlayerSummaryURL(steamID)
+	url := util.GetPlayerSummaryURL(steamID)
 	resp, err := Client.Get(url)
 
 	if err != nil {
@@ -197,21 +192,6 @@ func (p playerService) GetPlayerCurrentNickname(steamID string) string {
 
 	return playerNickname.Response.Players[0].Personaname
 
-}
-
-func buildGetPlayerSummaryURL(steamID string) string {
-	log.Printf("M=buildGetPlayerSummaryURL SteamID=%s\n", steamID)
-	return playerSummaryURL + valveKey + steamIDParamKey + steamID
-}
-
-func buildGetUserURL(userName string) string {
-	log.Printf("M=buildGetUserURL userName=%s\n", userName)
-	return userURL + valveKey + userParamKey + userName
-}
-
-func buildGetURL(steamID string) string {
-	log.Printf("M=buildGetURL steamID=%s\n", steamID)
-	return vacBanURL + valveKey + steamIDParamKey + steamID
 }
 
 /*

@@ -41,6 +41,8 @@ func setUpBotHandlers(bot *tb.Bot) {
 	bot.Handle("/start", func(m *tb.Message) { setUpStartHandler(m, bot) })
 
 	bot.Handle("/summary", func(m *tb.Message) { setUpSummaryHandler(m, bot) })
+
+	bot.Handle("/CSouVALO", func(m *tb.Message) { setUpChooserHandler(m, bot) })
 }
 
 func setUpFollowHandler(m *tb.Message, bot *tb.Bot) int64 {
@@ -109,6 +111,13 @@ func setUpSummaryHandler(m *tb.Message, bot *tb.Bot) {
 	userID := UserServiceClient.getUserID(m.Chat)
 
 	handler.HandleSummaryRequest(m, bot, userID)
+}
+
+func setUpChooserHandler(m *tb.Message, bot *tb.Bot) {
+	log.Printf("M=setUpChooserHandler telegramID=%v\n", m.Chat.ID)
+	userID := UserServiceClient.getUserID(m.Chat)
+
+	handler.HandleChooserRequest(m, bot, userID)
 }
 
 func isNumeric(s string) bool {

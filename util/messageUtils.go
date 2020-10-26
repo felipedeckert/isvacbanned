@@ -84,7 +84,7 @@ func GetStopResponse() string {
 	return "You will not be notified about any player anymore! Follow another player to start receiving news about all the players you followed."
 }
 
-//GetStopResponse returns the message for the /summary handler
+//GetSummaryResponse returns the message for the /summary handler
 func GetSummaryResponse(summary map[bool]int) string {
 	messageEnd := ""
 
@@ -97,4 +97,15 @@ func GetSummaryResponse(summary map[bool]int) string {
 	}
 
 	return fmt.Sprintf("You follow %v players%v", summary[true]+summary[false], messageEnd)
+}
+
+//GetChooserResponse returns the message for the /chooser handler
+func GetChooserResponse(i int) string {
+	CS := 0
+
+	if i == CS {
+		return "CS né, bicho?! Cês já viram a faquinha do Deck?!?"
+	}
+
+	return "MAGISTRAL: bora ter aula com esse nosso OMEN, XNDão!"
 }

@@ -2,6 +2,7 @@ package util
 
 import (
 	"fmt"
+	"math/rand"
 	"strconv"
 )
 
@@ -104,8 +105,30 @@ func GetChooserResponse(i int) string {
 	CS := 0
 
 	if i == CS {
-		return "CS né, bicho?! Cês já viram a faquinha do Deck?!?"
+		return getCSPhrase()
 	}
 
-	return "MAGISTRAL: bora ter aula com esse nosso OMEN, XNDão!"
+	return getValorantPhrase()
+}
+
+func getCSPhrase() string {
+	res := rand.Intn(2)
+	switch res {
+	case 0:
+		return "CS né, bicho?! Cês já viram a faquinha do Deck?!?"
+	default:
+		return "CS, mas o nosso Supremo tem que garantir 30+ kills!"
+	}
+}
+
+func getValorantPhrase() string {
+	res := rand.Intn(3)
+	switch res {
+	case 0:
+		return "MAGISTRAL: bora ter aula com esse nosso OMEN, XNDão!"
+	case 1:
+		return "Valozinho né?! Sempre tem AQUELE ace do Vilão!"
+	default:
+		return "Bora Valo que hoje tem: clutch do BOSS!"
+	}
 }

@@ -65,7 +65,7 @@ func GetStartResponse(username string) string {
 		"<argument> MUST be either a Steam ID or Custom ID!\n\n"+
 		"/show : displays a list of every player you're following with its BAN status;\n\n"+
 		"/summary : displays the summary of the players you follow with performance percentage;\n\n"+
-		"Consider donating to help keep this service up and running: TBA\n\n"+
+		"Consider donating to help keep this service up and running: https://picpay.me/felipedeckert \n\n"+
 		"________________________________________________\n"+
 		"Esses são os comandos aceitos pelo bot: \n"+
 		"/start : te mostra essa mesma mensagem;\n\n"+
@@ -77,7 +77,7 @@ func GetStartResponse(username string) string {
 		"<argumento> tem que ser Steam ID ou Custom ID!\n\n"+
 		"/show : mostra uma lista de todos os jkogadores seguidos e seus status de banimento;\n\n"+
 		"/summary : mostra um resumo dos jogadores seguidos e porcentagem de banimento;\n\n"+
-		"Considere doar para manter o serviço funcionando e com atualizações: em breve", username)
+		"Considere doar para manter o serviço funcionando e com atualizações: https://picpay.me/felipedeckert", username)
 }
 
 //GetStopResponse returns the message for the /stop handler

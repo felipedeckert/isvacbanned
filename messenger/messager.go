@@ -39,7 +39,7 @@ func (m Messenger) SendMessageToChat(bot *tb.Bot, chat *tb.Chat, message string)
 
 //SendMessageToUser sends a message to user/group via telegram API
 func (m Messenger) SendMessageToUser(message string, chatID int64) {
-	token := "1324910657:AAFSlJn6TD9EeYNn35MEo-YphYlhYhqc_do"
+	token := "1262870496:AAG_XdC_OYONPVWeGAxInBmAGr2JfT8uOl0"
 
 	if !util.LOCAL {
 		token = os.Getenv("TOKEN")

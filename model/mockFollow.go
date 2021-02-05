@@ -47,6 +47,6 @@ func (f FollowMock) GetUsersFollowedSummary(userID int64) map[bool]int {
 }
 
 //IsFollowed is the mock implementation of IsFollowed
-func (f FollowMock) IsFollowed(steamID string, userID int64) (int64, error) {
-	return int64(1), nil
+func (f FollowMock) IsFollowed(steamID string, userID int64) (string, int64, error) {
+	return "name", int64(1), nil
 }

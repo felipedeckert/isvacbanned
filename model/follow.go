@@ -21,7 +21,7 @@ type FollowModelInterface interface {
 	SetCurrNickname(userID int64, sanitizedActualNickname string)
 	SetFollowedUserToCompleted(id []int64) int64
 	GetUsersFollowedSummary(userID int64) map[bool]int
-	IsFollowed(steamID string, userID int64) (int64, error)
+	IsFollowed(steamID string, userID int64) (string, int64, error)
 }
 
 var FollowModelClient FollowModelInterface = FollowModel{}
@@ -248,15 +248,16 @@ func (f FollowModel) GetUsersFollowedSummary(userID int64) map[bool]int {
 }
 
 // IsFollowed checks if a user already follows a player
-func (f FollowModel) IsFollowed(steamID string, userID int64) (int64, error) {
+func (f FollowModel) IsFollowed(steamID string, userID int64) (string, int64, error) {
 
-	row := util.GetDatabase().QueryRow("SELECT id FROM follow WHERE steam_id = ? AND user_id = ?", steamID, userID)
+	row := util.GetDatabase().QueryRow("SELECT old_nickname, id FROM follow WHERE steam_id = ? AND user_id = ?", steamID, userID)
 
+	var oldNickname string
 	var id int64
 
-	err := row.Scan(&id)
+	err := row.Scan(&oldNickname, &id)
 
-	return id, err
+	return oldNickname, id, err
 }
 
 func sliceToStringParam(ids []int64) string {

@@ -3,7 +3,6 @@ package util
 import (
 	"fmt"
 	"math/rand"
-	"strconv"
 )
 
 //GetNicknameChangedMessage returns the message when players change their nicknames
@@ -23,19 +22,28 @@ func GetBanMessage(oldNickname, currNickname, steamID string, daysSinceLastBan i
 	if oldNickname != currNickname {
 		changedNickPhrase = ", now under the nickname " + currNickname
 	}
-	return "BAN NEWS: The user you followed as " + oldNickname + changedNickPhrase + ", Steam Profile: " + SteamProfileURL + steamID + ", has been BANNED " + strconv.Itoa(daysSinceLastBan) + " days ago! You won't be notified about this player anymore."
+	return "❌❌❌ BAN NEWS: The user you followed as " + oldNickname + changedNickPhrase + ", Steam Profile: " + SteamProfileURL + steamID + ", has just been BANNED! You won't be notified about this player anymore."
 }
 
 //GetFollowResponseMessage returns the message when a user follow a player
-func GetFollowResponseMessage(currNickname string, followersCount, followID int64, isVACBanned bool) string {
+func GetFollowResponseMessage(oldNickname, currNickname string, followersCount int64, isVACBanned bool) string {
 
 	var status string = "NOT banned (yet)."
 	if isVACBanned {
 		status = "BANNED (yay)."
 	}
 
-	if followID > 0 {
-		return fmt.Sprintf("You already follow this player. Its current status is: %v", status)
+	if oldNickname != "" {
+
+		messagePartOne := fmt.Sprintf("You already follow %v. ", currNickname)
+		messagePartTwo := fmt.Sprintf("")
+		messagePartThree := fmt.Sprintf("His current status is: %v.", status)
+
+		if currNickname != oldNickname {
+			messagePartTwo = fmt.Sprintf("He used to go by %v. ", oldNickname)
+		}
+
+		return messagePartOne + messagePartTwo + messagePartThree
 	}
 
 	message := fmt.Sprintf("Following player %v, status=%v", currNickname, status)

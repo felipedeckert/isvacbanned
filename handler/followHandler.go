@@ -33,22 +33,23 @@ func (f FollowHandler) HandleFollowRequest(m *tb.Message, bot *tb.Bot, steamID, 
 
 	var dbID int64
 
-	followID, err := model.FollowModelClient.IsFollowed(steamID, userID)
+	oldNickname, followID, err := model.FollowModelClient.IsFollowed(steamID, userID)
 	if err != nil && err != sql.ErrNoRows {
 		panic(err)
 	}
 
 	updateID := followID
 
-	if followID == 0 {
+	if oldNickname == "" {
 		dbID = model.FollowModelClient.FollowSteamUser(m.Chat.ID, steamID, currNickname, userID)
 		updateID = dbID
 	}
+
 	if isVACBanned {
 		model.FollowModelClient.SetFollowedUserToCompleted([]int64{updateID})
 	}
 
-	response := util.GetFollowResponseMessage(currNickname, followersCount, followID, isVACBanned)
+	response := util.GetFollowResponseMessage(oldNickname, currNickname, followersCount, isVACBanned)
 
 	messenger.MessengerClient.SendMessageToChat(bot, m.Chat, response)
 

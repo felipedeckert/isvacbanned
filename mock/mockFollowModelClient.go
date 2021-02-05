@@ -42,7 +42,7 @@ func (f *FollowModelClient) SetFollowedUserToCompleted(id []int64) int64 {
 	return GetSetFollowedUserToCompleted(id)
 }
 
-func (f *FollowModelClient) IsFollowed(steamID string, userID int64) (int64, error) {
+func (f *FollowModelClient) IsFollowed(steamID string, userID int64) (string, int64, error) {
 	return GetIsFollowed(steamID, userID)
 }
 
@@ -54,5 +54,5 @@ var (
 	GetGetUsersFollowed               func(userID int64) []model.UsersFollowed
 	GetSetCurrNickname                func(userId int64, sanitizedActualNickname string)
 	GetSetFollowedUserToCompleted     func(id []int64) int64
-	GetIsFollowed                     func(steamID string, userID int64) (int64, error)
+	GetIsFollowed                     func(steamID string, userID int64) (string, int64, error)
 )

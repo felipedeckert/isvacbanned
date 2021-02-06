@@ -3,6 +3,7 @@ package messenger
 import (
 	"isvacbanned/util"
 	"net/http"
+	"net/url"
 	"os"
 	"strconv"
 
@@ -46,7 +47,7 @@ func (m Messenger) SendMessageToUser(message string, chatID int64) {
 	}
 
 	sendMessageURL := telegramAPIURL + token + telegramMethod + telegramChatIDParam + strconv.FormatInt(chatID, 10) + telegramTextParam + message
-	_, err := http.Get(sendMessageURL)
+	_, err := http.Get(url.QueryEscape(sendMessageURL))
 	if err != nil {
 		panic(err)
 	}

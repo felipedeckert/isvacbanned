@@ -116,7 +116,8 @@ func getAllPlayersStatus(userSteamID map[string]string) map[string]Player {
 // GetPlayerStatus receives a steamID and returns its player ban status
 func (p playerService) GetPlayerStatus(steamID string) Player {
 	url := util.GetVACBanURL(steamID)
-	log.Printf("M=getPlayerStatus url=%v\n", url)
+	//todo change to debug level
+	//log.Printf("M=getPlayerStatus url=%v\n", url)
 	resp, err := Client.Get(url)
 
 	if err != nil {
@@ -186,9 +187,10 @@ func (p playerService) GetPlayerCurrentNickname(steamID string) string {
 	if len(playerNickname.Response.Players) == 0 {
 		log.Printf("M=GetPlayerCurrentNickname status=404 steamID=%v\n", steamID)
 		return ""
-	} else {
+	} /*else {
+		//todo change to debug level
 		log.Printf("M=GetPlayerCurrentNickname status=200 steamID=%v\n", steamID)
-	}
+	}*/
 
 	return playerNickname.Response.Players[0].Personaname
 

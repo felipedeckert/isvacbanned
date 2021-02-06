@@ -3,6 +3,7 @@ package util
 import (
 	"fmt"
 	"math/rand"
+	"strings"
 )
 
 //GetNicknameChangedMessage returns the message when players change their nicknames
@@ -20,9 +21,9 @@ func GetBanMessage(oldNickname, currNickname, steamID string, daysSinceLastBan i
 	// if the player hasn't changed nickname no reason to return redundant message
 	changedNickPhrase := ""
 	if oldNickname != currNickname {
-		changedNickPhrase = ", now under the nickname " + currNickname
+		changedNickPhrase = ", now under the nickname " + strings.Replace(currNickname, "%", "", -1)
 	}
-	return "❌❌❌ BAN NEWS: The user you followed as " + oldNickname + changedNickPhrase + ", Steam Profile: " + SteamProfileURL + steamID + ", has just been BANNED! You won't be notified about this player anymore."
+	return "❌❌❌ BAN NEWS: The user you followed as " + strings.Replace(oldNickname, "%", "", -1) + changedNickPhrase + ", Steam Profile: " + SteamProfileURL + steamID + ", has just been BANNED! You won't be notified about this player anymore."
 }
 
 //GetFollowResponseMessage returns the message when a user follow a player

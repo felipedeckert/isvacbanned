@@ -69,7 +69,9 @@ func validateBanStatusAndSendMessage(user model.UsersFollowed, chatID int64) []i
 func validateNicknameAndSendMessage(user model.UsersFollowed, chatID int64) {
 	actualNickname := service.PlayerServiceClient.GetPlayerCurrentNickname(user.SteamID)
 
-	if user.CurrNickname != actualNickname {
+	if actualNickname == "" {
+		log.Printf("M=validateNicknameAndSendMessage L=E steamID=%v status=emptyCurrentNickname\n", user.SteamID)
+	} else if user.CurrNickname != actualNickname {
 		log.Printf("M=validateNicknameAndSendMessage steamID=%v status=changedNickname\n", user.SteamID)
 		model.FollowModelClient.SetCurrNickname(user.ID, actualNickname)
 		messenger.MessengerClient.SendMessageToUser(util.GetNicknameChangedMessage(user.OldNickname, user.CurrNickname, actualNickname, user.SteamID), chatID)

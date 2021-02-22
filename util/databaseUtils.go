@@ -8,7 +8,6 @@ import (
 )
 
 var (
-	LOCAL    bool    = false
 	Database *sql.DB = nil
 	mutex    sync.Mutex
 	MyTx     *sql.Tx
@@ -30,13 +29,7 @@ func StartDatabase() {
 
 	mutex.Lock()
 
-	if LOCAL {
-		// LOCAL
-		db, err = sql.Open("mysql", "isvacbanned:root@tcp(localhost:3306)/isvacbanned")
-	} else {
-		// PROD
-		db, err = sql.Open("mysql", credentials+"@tcp(us-cdbr-east-02.cleardb.com:3306)/heroku_bace7cf727a523d")
-	}
+	db, err = sql.Open("mysql", credentials+"@tcp(us-cdbr-east-02.cleardb.com:3306)/heroku_bace7cf727a523d")
 
 	if err != nil {
 		panic(err)

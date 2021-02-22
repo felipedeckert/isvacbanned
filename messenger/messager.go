@@ -1,7 +1,6 @@
 package messenger
 
 import (
-	"isvacbanned/util"
 	"net/http"
 	"os"
 	"strconv"
@@ -39,11 +38,7 @@ func (m Messenger) SendMessageToChat(bot *tb.Bot, chat *tb.Chat, message string)
 
 //SendMessageToUser sends a message to user/group via telegram API
 func (m Messenger) SendMessageToUser(message string, chatID int64) {
-	token := "1262870496:AAG_XdC_OYONPVWeGAxInBmAGr2JfT8uOl0"
-
-	if !util.LOCAL {
-		token = os.Getenv("TOKEN")
-	}
+	token := os.Getenv("TOKEN")
 
 	sendMessageURL := telegramAPIURL + token + telegramMethod + telegramChatIDParam + strconv.FormatInt(chatID, 10) + telegramTextParam + message
 	_, err := http.Get(sendMessageURL)

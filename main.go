@@ -31,12 +31,6 @@ func startTelegramBot() {
 		token     = os.Getenv("TOKEN")
 	)
 
-	if util.LOCAL {
-		port = "3000"                                            //os.Getenv("PORT")
-		publicURL = "https://is-vac-banned.herokuapp.com/"       //os.Getenv("PUBLIC_URL")
-		token = "1262870496:AAG_XdC_OYONPVWeGAxInBmAGr2JfT8uOl0" //os.Getenv("TOKEN")
-	}
-
 	util.StartDatabase()
 
 	webhook := &tb.Webhook{

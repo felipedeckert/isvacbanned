@@ -2,18 +2,20 @@ package util
 
 import (
 	"fmt"
+	"html"
 	"math/rand"
-	"strings"
 )
 
 //GetNicknameChangedMessage returns the message when players change their nicknames
 func GetNicknameChangedMessage(oldNickname, recentNickname, currNickname, steamID string) string {
 	diffRecentNickname := ""
 	if oldNickname != recentNickname {
-		diffRecentNickname = ", recently playing as \"" + recentNickname + "\""
+		diffRecentNickname = fmt.Sprintf(`, recently playing as "%s"`, html.EscapeString(recentNickname))
 	}
 
-	return "NICKNAME CHANGED: The user you followed as \"" + oldNickname + "\"" + diffRecentNickname + ", Steam Profile: " + SteamProfileURL + steamID + ", is now under the nickname \"" + currNickname + "\""
+	return fmt.Sprintf(`NICKNAME CHANGED: The user you followed as "%s"%s, 
+							   Steam Profile: %s%s, is now under the nickname "%s"`,
+		oldNickname, diffRecentNickname, SteamProfileURL, steamID , currNickname)
 }
 
 //GetBanMessage returns the message when a player get banned
@@ -21,33 +23,35 @@ func GetBanMessage(oldNickname, currNickname, steamID string, daysSinceLastBan i
 	// if the player hasn't changed nickname no reason to return redundant message
 	changedNickPhrase := ""
 	if oldNickname != currNickname {
-		changedNickPhrase = ", now under the nickname " + strings.Replace(currNickname, "%", "", -1)
+		changedNickPhrase = fmt.Sprintf(", now under the nickname %s", html.EscapeString(currNickname))
 	}
-	return "❌❌❌ BAN NEWS: The user you followed as " + strings.Replace(oldNickname, "%", "", -1) + changedNickPhrase + ", Steam Profile: " + SteamProfileURL + steamID + ", has just been BANNED! You won't be notified about this player anymore."
+	return fmt.Sprintf(`❌❌❌ BAN NEWS: The user you followed as %s%s, Steam Profile: %s%s, 
+							   has just been BANNED! You won't be notified about this player anymore.`,
+		html.EscapeString(oldNickname), changedNickPhrase, SteamProfileURL, steamID)
 }
 
 //GetFollowResponseMessage returns the message when a user follow a player
 func GetFollowResponseMessage(oldNickname, currNickname string, followersCount int64, isVACBanned bool) string {
 
-	var status string = "NOT banned (yet)."
+	var status = "NOT banned (yet)."
 	if isVACBanned {
 		status = "BANNED (yay)."
 	}
 
 	if oldNickname != "" {
 
-		messagePartOne := fmt.Sprintf("You already follow %v. ", currNickname)
+		messagePartOne := fmt.Sprintf("You already follow %s. ", html.EscapeString(currNickname))
 		messagePartTwo := fmt.Sprintf("")
 		messagePartThree := fmt.Sprintf("His current status is: %v.", status)
 
 		if currNickname != oldNickname {
-			messagePartTwo = fmt.Sprintf("He used to go by %v. ", oldNickname)
+			messagePartTwo = fmt.Sprintf("He used to go by %s. ", html.EscapeString(oldNickname))
 		}
 
-		return messagePartOne + messagePartTwo + messagePartThree
+		return fmt.Sprintf(`%s%s%s`, messagePartOne, messagePartTwo, messagePartThree)
 	}
 
-	message := fmt.Sprintf("Following player %v, status=%v", currNickname, status)
+	message := fmt.Sprintf("Following player %v, status=%v", html.EscapeString(currNickname), status)
 
 	if !isVACBanned {
 		if followersCount > 0 {
@@ -84,7 +88,7 @@ func GetStartResponse(username string) string {
 		"<argumento> pode ser Steam ID, Custom ID ou a URL do perfil.\n\n"+
 		"/unfollow <argumento>: desabilita notificações de um jogador específico;\n"+
 		"<argumento> tem que ser Steam ID ou Custom ID!\n\n"+
-		"/show : mostra uma lista de todos os jkogadores seguidos e seus status de banimento;\n\n"+
+		"/show : mostra uma lista de todos os jogadores seguidos e seus status de banimento;\n\n"+
 		"/summary : mostra um resumo dos jogadores seguidos e porcentagem de banimento;\n\n"+
 		"Considere doar para manter o serviço funcionando e com atualizações: https://picpay.me/felipedeckert", username)
 }

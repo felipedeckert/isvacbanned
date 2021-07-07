@@ -3,26 +3,21 @@ package util
 import (
 	"fmt"
 	"math/rand"
-	"strings"
 )
 
 //GetNicknameChangedMessage returns the message when players change their nicknames
 func GetNicknameChangedMessage(oldNickname, recentNickname, currNickname, steamID string) string {
 	diffRecentNickname := ""
 	if oldNickname != recentNickname {
-		diffRecentNickname = fmt.Sprintf(`, recently playing as "%s"`,
+		diffRecentNickname = fmt.Sprintf(`, recently playing as %s`,
 			recentNickname,
 			//html.EscapeString(recentNickname)
 		)
 	}
 
-	return fmt.Sprintf(`NICKNAME CHANGED: The user you followed as "%s"%s, 
-							   Steam Profile: %s%s, is now under the nickname "%s"`,
-		escape(oldNickname), escape(diffRecentNickname), SteamProfileURL, steamID , escape(currNickname))
-}
-
-func escape(input string) string {
-	return strings.Replace(input, "#", "\\#", -1)
+	return fmt.Sprintf(`NICKNAME CHANGED: The user you followed as %s%s, 
+							   Steam Profile: %s%s, is now under the nickname %s`,
+		oldNickname, diffRecentNickname, SteamProfileURL, steamID , currNickname)
 }
 
 //GetBanMessage returns the message when a player get banned

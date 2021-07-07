@@ -1,7 +1,9 @@
 package messenger
 
 import (
+	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"strconv"
 
@@ -41,8 +43,13 @@ func (m Messenger) SendMessageToUser(message string, chatID int64) {
 	token := os.Getenv("TOKEN")
 
 	sendMessageURL := telegramAPIURL + token + telegramMethod + telegramChatIDParam + strconv.FormatInt(chatID, 10) + telegramTextParam + message
-	_, err := http.Get(sendMessageURL)
+
+	parsedURL, err := url.Parse(sendMessageURL)
 	if err != nil {
-		panic(err)
+		log.Printf(`M=SendMessageToUser error while parsing URL=%s, err=%s`, sendMessageURL, err.Error())
+	}
+	_, err = http.Get(parsedURL.String())
+	if err != nil {
+		log.Printf(`M=SendMessageToUser error sending message URL=%s, err=%s`, parsedURL, err.Error())
 	}
 }

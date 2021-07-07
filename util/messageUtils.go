@@ -9,14 +9,14 @@ import (
 func GetNicknameChangedMessage(oldNickname, recentNickname, currNickname, steamID string) string {
 	diffRecentNickname := ""
 	if oldNickname != recentNickname {
-		diffRecentNickname = fmt.Sprintf(`, recently playing as %s`,
+		diffRecentNickname = fmt.Sprintf(`, recently playing as "%s"`,
 			recentNickname,
 			//html.EscapeString(recentNickname)
 		)
 	}
 
-	return fmt.Sprintf(`NICKNAME CHANGED: The user you followed as %s%s, 
-							   Steam Profile: %s%s, is now under the nickname %s`,
+	return fmt.Sprintf(`NICKNAME CHANGED: The user you followed as "%s"%s, 
+							   Steam Profile: %s%s, is now under the nickname "%s"`,
 		oldNickname, diffRecentNickname, SteamProfileURL, steamID , currNickname)
 }
 
@@ -46,7 +46,7 @@ func GetFollowResponseMessage(oldNickname, currNickname string, followersCount i
 
 	if oldNickname != "" {
 
-		messagePartOne := fmt.Sprintf("You already follow %s. ",
+		messagePartOne := fmt.Sprintf(`You already follow "%s". `,
 			currNickname,
 			//html.EscapeString(currNickname)
 		)
@@ -54,7 +54,7 @@ func GetFollowResponseMessage(oldNickname, currNickname string, followersCount i
 		messagePartThree := fmt.Sprintf("His current status is: %v.", status)
 
 		if currNickname != oldNickname {
-			messagePartTwo = fmt.Sprintf("He used to go by %s. ",
+			messagePartTwo = fmt.Sprintf(`He used to go by "%s". `,
 				oldNickname,
 				//html.EscapeString(oldNickname)
 			)

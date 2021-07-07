@@ -2,7 +2,6 @@ package util
 
 import (
 	"fmt"
-	"html"
 	"math/rand"
 )
 
@@ -10,7 +9,10 @@ import (
 func GetNicknameChangedMessage(oldNickname, recentNickname, currNickname, steamID string) string {
 	diffRecentNickname := ""
 	if oldNickname != recentNickname {
-		diffRecentNickname = fmt.Sprintf(`, recently playing as "%s"`, html.EscapeString(recentNickname))
+		diffRecentNickname = fmt.Sprintf(`, recently playing as "%s"`,
+			recentNickname,
+			//html.EscapeString(recentNickname)
+		)
 	}
 
 	return fmt.Sprintf(`NICKNAME CHANGED: The user you followed as "%s"%s, 
@@ -23,11 +25,15 @@ func GetBanMessage(oldNickname, currNickname, steamID string, daysSinceLastBan i
 	// if the player hasn't changed nickname no reason to return redundant message
 	changedNickPhrase := ""
 	if oldNickname != currNickname {
-		changedNickPhrase = fmt.Sprintf(", now under the nickname %s", html.EscapeString(currNickname))
+		changedNickPhrase = fmt.Sprintf(", now under the nickname %s",
+			currNickname,
+			//html.EscapeString(currNickname),
+		)
 	}
 	return fmt.Sprintf(`❌❌❌ BAN NEWS: The user you followed as %s%s, Steam Profile: %s%s, 
 							   has just been BANNED! You won't be notified about this player anymore.`,
-		html.EscapeString(oldNickname), changedNickPhrase, SteamProfileURL, steamID)
+		//html.EscapeString(oldNickname),
+		oldNickname, changedNickPhrase, SteamProfileURL, steamID)
 }
 
 //GetFollowResponseMessage returns the message when a user follow a player
@@ -40,18 +46,27 @@ func GetFollowResponseMessage(oldNickname, currNickname string, followersCount i
 
 	if oldNickname != "" {
 
-		messagePartOne := fmt.Sprintf("You already follow %s. ", html.EscapeString(currNickname))
+		messagePartOne := fmt.Sprintf("You already follow %s. ",
+			currNickname,
+			//html.EscapeString(currNickname)
+		)
 		messagePartTwo := fmt.Sprintf("")
 		messagePartThree := fmt.Sprintf("His current status is: %v.", status)
 
 		if currNickname != oldNickname {
-			messagePartTwo = fmt.Sprintf("He used to go by %s. ", html.EscapeString(oldNickname))
+			messagePartTwo = fmt.Sprintf("He used to go by %s. ",
+				oldNickname,
+				//html.EscapeString(oldNickname)
+			)
 		}
 
 		return fmt.Sprintf(`%s%s%s`, messagePartOne, messagePartTwo, messagePartThree)
 	}
 
-	message := fmt.Sprintf("Following player %v, status=%v", html.EscapeString(currNickname), status)
+	message := fmt.Sprintf("Following player %s, status=%s",
+		currNickname,
+		//html.EscapeString(currNickname),
+		status)
 
 	if !isVACBanned {
 		if followersCount > 0 {

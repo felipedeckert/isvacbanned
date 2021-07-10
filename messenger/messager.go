@@ -44,16 +44,17 @@ func (m Messenger) SendMessageToUser(message string, chatID int64) {
 
 	sendMessageURL := telegramAPIURL + token + telegramMethod + telegramChatIDParam + strconv.FormatInt(chatID, 10) + telegramTextParam + url.QueryEscape(message)
 
-	parsedURL, err := url.Parse("#"+sendMessageURL)
+	//parsedURL, err := url.Parse("#"+sendMessageURL)
 
-	log.Printf(`M=SendMessageToUser L=I URL=%s parsedURL=%s`, sendMessageURL, parsedURL)
-
+	//log.Printf(`M=SendMessageToUser L=I URL=%s parsedURL=%s`, sendMessageURL, parsedURL)
+	//
+	//if err != nil {
+	//	log.Printf(`M=SendMessageToUser L=E error while parsing URL=%s, err=%s`, sendMessageURL, err.Error())
+	//	return
+	//}
+	//_, err = http.Get(parsedURL.String()[1:])
+	_, err := http.Get(sendMessageURL)
 	if err != nil {
-		log.Printf(`M=SendMessageToUser L=E error while parsing URL=%s, err=%s`, sendMessageURL, err.Error())
-		return
-	}
-	_, err = http.Get(parsedURL.String()[1:])
-	if err != nil {
-		log.Printf(`M=SendMessageToUser L=E error sending message URL=%s, err=%s`, parsedURL, err.Error())
+		log.Printf(`M=SendMessageToUser L=E error sending message URL=%s, err=%s`, sendMessageURL, err.Error())
 	}
 }

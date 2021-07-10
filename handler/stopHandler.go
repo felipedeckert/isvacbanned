@@ -3,6 +3,7 @@ package handler
 import (
 	"isvacbanned/model"
 	"isvacbanned/util"
+	"log"
 
 	tb "gopkg.in/tucnak/telebot.v2"
 )
@@ -13,5 +14,8 @@ func StopHandler(m *tb.Message, bot *tb.Bot, userID int64) {
 
 	message := util.GetStopResponse()
 
-	bot.Send(m.Chat, message)
+	_, err := bot.Send(m.Chat, message)
+	if err != nil {
+		log.Printf("M=StopHandler err=%s", err.Error())
+	}
 }

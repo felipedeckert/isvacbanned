@@ -2,6 +2,7 @@ package service
 
 import (
 	"bytes"
+	"errors"
 	"io/ioutil"
 	"isvacbanned/mock"
 	"net/http"
@@ -48,8 +49,13 @@ func TestGetArgumentFromURLInvalidURL(t *testing.T) {
 }
 
 func TestGetSteamIDInvalidURL(t *testing.T) {
+	UrlServiceClient = urlService{}
 	lastParam := "third"
 	myURL := "http://first.com/second/" + lastParam
+
+	mock.GetFunc = func(url string) (*http.Response, error) {
+		return nil, errors.New("error")
+	}
 
 	_, err := UrlServiceClient.getSteamID(myURL)
 
@@ -59,6 +65,7 @@ func TestGetSteamIDInvalidURL(t *testing.T) {
 }
 
 func TestGetSteamID(t *testing.T) {
+	UrlServiceClient = urlService{}
 	expectedParam := "third"
 	myURL := "http://first.com/profile/" + expectedParam
 

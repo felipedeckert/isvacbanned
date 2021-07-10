@@ -16,32 +16,32 @@ func RunScheduler() {
 	log.Printf("M=RunScheduler\n")
 	scheduler := gocron.NewScheduler(time.UTC)
 
-	scheduler.Every(60).Minutes().Do(checkFollownUsersBan)
-	scheduler.Every(30).Seconds().Do(checkFollownUsersNickname)
+	scheduler.Every(60).Minutes().Do(checkFollowedUsersBan)
+	scheduler.Every(30).Seconds().Do(checkFollowedUsersNickname)
 
 	scheduler.StartAsync()
 }
 
-func checkFollownUsersBan() {
-	usersIncompleted := model.FollowModelClient.GetAllIncompletedFollowedUsers()
+func checkFollowedUsersBan() {
+	usersIncomplete := model.FollowModelClient.GetAllIncompleteFollowedUsers()
 	var usersToComplete []int64
-	for chatID, steamIDList := range usersIncompleted {
+	for chatID, steamIDList := range usersIncomplete {
 		for _, users := range steamIDList {
 			usersToComplete = append(usersToComplete, validateBanStatusAndSendMessage(users, chatID)...)
 		}
 	}
 	if len(usersToComplete) > 0 {
-		//Once a player status is set to completed, this player will not be returned in the GetAllIncompletedFollowedUsers query
+		//Once a player status is set to completed, this player will not be returned in the GetAllIncompleteFollowedUsers query
 		model.FollowModelClient.SetFollowedUserToCompleted(usersToComplete)
 	}
 
 	log.Printf("M=checkFollownUsersBan usersToCompleteCount=%v\n", len(usersToComplete))
 }
 
-func checkFollownUsersNickname() {
-	usersIncompleted := model.FollowModelClient.GetAllIncompletedFollowedUsers()
+func checkFollowedUsersNickname() {
+	usersIncomplete := model.FollowModelClient.GetAllIncompleteFollowedUsers()
 
-	for chatID, steamIDList := range usersIncompleted {
+	for chatID, steamIDList := range usersIncomplete {
 		for _, users := range steamIDList {
 			validateNicknameAndSendMessage(users, chatID)
 		}
@@ -72,7 +72,7 @@ func validateNicknameAndSendMessage(user model.UsersFollowed, chatID int64) {
 	if actualNickname == "" {
 		log.Printf("M=validateNicknameAndSendMessage L=E steamID=%v status=emptyCurrentNickname\n", user.SteamID)
 	} else if user.CurrNickname != actualNickname {
-		log.Printf("M=validateNicknameAndSendMessage steamID=%v status=changedNickname\n", user.SteamID)
+		log.Printf("M=validateNicknameAndSendMessage L=I steamID=%v status=changedNickname\n", user.SteamID)
 		model.FollowModelClient.SetCurrNickname(user.ID, actualNickname)
 		messenger.MessengerClient.SendMessageToUser(util.GetNicknameChangedMessage(user.OldNickname, user.CurrNickname, actualNickname, user.SteamID), chatID)
 	}

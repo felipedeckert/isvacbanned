@@ -9,14 +9,10 @@ import (
 func GetNicknameChangedMessage(oldNickname, recentNickname, currNickname, steamID string) string {
 	diffRecentNickname := ""
 	if oldNickname != recentNickname {
-		diffRecentNickname = fmt.Sprintf(`, recently playing as "%s"`,
-			recentNickname,
-			//html.EscapeString(recentNickname)
-		)
+		diffRecentNickname = fmt.Sprintf(`, recently playing as "%s"`, recentNickname)
 	}
 
-	return fmt.Sprintf(`NICKNAME CHANGED: The user you followed as "%s"%s, 
-							   Steam Profile: %s%s, is now under the nickname "%s"`,
+	return fmt.Sprintf(`NICKNAME CHANGED: The user you followed as "%s"%s, Steam Profile: %s%s, is now under the nickname "%s"`,
 		oldNickname, diffRecentNickname, SteamProfileURL, steamID , currNickname)
 }
 
@@ -25,10 +21,7 @@ func GetBanMessage(oldNickname, currNickname, steamID string, daysSinceLastBan i
 	// if the player hasn't changed nickname no reason to return redundant message
 	changedNickPhrase := ""
 	if oldNickname != currNickname {
-		changedNickPhrase = fmt.Sprintf(", now under the nickname %s",
-			currNickname,
-			//html.EscapeString(currNickname),
-		)
+		changedNickPhrase = fmt.Sprintf(", now under the nickname %s", currNickname)
 	}
 	return fmt.Sprintf(`❌❌❌ BAN NEWS: The user you followed as %s%s, Steam Profile: %s%s, 
 							   has just been BANNED! You won't be notified about this player anymore.`,
@@ -45,44 +38,34 @@ func GetFollowResponseMessage(oldNickname, currNickname string, followersCount i
 	}
 
 	if oldNickname != "" {
-
-		messagePartOne := fmt.Sprintf(`You already follow "%s". `,
-			currNickname,
-			//html.EscapeString(currNickname)
-		)
-		messagePartTwo := fmt.Sprintf("")
-		messagePartThree := fmt.Sprintf("His current status is: %v.", status)
+		messagePartOne := fmt.Sprintf(`You already follow "%s". `, currNickname)
+		messagePartTwo := ""
+		messagePartThree := fmt.Sprintf(`His current status is: %s.`, status)
 
 		if currNickname != oldNickname {
-			messagePartTwo = fmt.Sprintf(`He used to go by "%s". `,
-				oldNickname,
-				//html.EscapeString(oldNickname)
-			)
+			messagePartTwo = fmt.Sprintf(`He used to go by "%s". `, oldNickname)
 		}
 
 		return fmt.Sprintf(`%s%s%s`, messagePartOne, messagePartTwo, messagePartThree)
 	}
 
-	message := fmt.Sprintf("Following player %s, status=%s",
-		currNickname,
-		//html.EscapeString(currNickname),
-		status)
+	message := fmt.Sprintf(`Following player %s, status=%s`, currNickname, status)
 
 	if !isVACBanned {
 		if followersCount > 0 {
-			message += fmt.Sprintf(" Which is being followed by %v other users.", followersCount)
+			message += fmt.Sprintf(` Which is being followed by %v other users.`, followersCount)
 		} else {
-			message += " You're the first to follow this player!"
+			message += ` You're the first to follow this player!`
 		}
 	} else {
-		message += " You will NOT receive updates about this player since it's banned!"
+		message += ` You will NOT receive updates about this player since it's banned!`
 	}
 	return message
 }
 
 //GetStartResponse returns the message for the /start handler
 func GetStartResponse(username string) string {
-	return fmt.Sprintf("Hello %v, welcome to the Is VAC Banned Bot! EN/PT embaixo\n"+
+	return fmt.Sprintf(`Hello %v, welcome to the Is VAC Banned Bot! EN/PT embaixo\n`+
 		"These are the commands accepted by the bot: \n"+
 		"/start : show you this very same message;\n\n"+
 		"/stop : to disable any notifications you signed up for before;\n\n"+

@@ -30,12 +30,18 @@ var MessengerClient MessengerInterface = Messenger{}
 
 //SendMessage sends a message to user via bot
 func (m Messenger) SendMessage(bot *tb.Bot, user *tb.User, message string) {
-	bot.Send(user, message)
+	_, err := bot.Send(user, message)
+	if err != nil {
+		log.Printf("M=SendMessage err=%s", err.Error())
+	}
 }
 
 //SendMessageToChat sends a message to chat via bot
 func (m Messenger) SendMessageToChat(bot *tb.Bot, chat *tb.Chat, message string) {
-	bot.Send(chat, message)
+	_, err := bot.Send(chat, message)
+	if err != nil {
+		log.Printf("M=SendMessageToChat err=%s", err.Error())
+	}
 }
 
 //SendMessageToUser sends a message to user/group via telegram API
@@ -44,15 +50,6 @@ func (m Messenger) SendMessageToUser(message string, chatID int64) {
 
 	sendMessageURL := telegramAPIURL + token + telegramMethod + telegramChatIDParam + strconv.FormatInt(chatID, 10) + telegramTextParam + url.QueryEscape(message)
 
-	//parsedURL, err := url.Parse("#"+sendMessageURL)
-
-	//log.Printf(`M=SendMessageToUser L=I URL=%s parsedURL=%s`, sendMessageURL, parsedURL)
-	//
-	//if err != nil {
-	//	log.Printf(`M=SendMessageToUser L=E error while parsing URL=%s, err=%s`, sendMessageURL, err.Error())
-	//	return
-	//}
-	//_, err = http.Get(parsedURL.String()[1:])
 	_, err := http.Get(sendMessageURL)
 	if err != nil {
 		log.Printf(`M=SendMessageToUser L=E error sending message URL=%s, err=%s`, sendMessageURL, err.Error())

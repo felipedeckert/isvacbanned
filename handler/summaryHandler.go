@@ -14,5 +14,8 @@ func HandleSummaryRequest(m *tb.Message, bot *tb.Bot, userID int64) {
 
 	log.Printf("M=HandleSummaryRequest L=I userID=%v \n", m.Chat.ID)
 
-	bot.Send(m.Chat, util.GetSummaryResponse(summary))
+	_, err := bot.Send(m.Chat, util.GetSummaryResponse(summary))
+	if err != nil {
+		log.Printf("M=HandleSummaryRequest err=%s", err.Error())
+	}
 }

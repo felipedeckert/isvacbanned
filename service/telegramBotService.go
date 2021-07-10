@@ -9,9 +9,6 @@ import (
 	tb "gopkg.in/tucnak/telebot.v2"
 )
 
-const playerBanned = "This player is VAC banned!"
-const playerNotBanned = "This player is NOT VAC banned!"
-
 // SetUpBot sets up the bot configs and its handlers
 func SetUpBot(webhook *tb.Webhook, token string) {
 	pref := tb.Settings{
@@ -52,10 +49,14 @@ func setUpFollowHandler(m *tb.Message, bot *tb.Bot) int64 {
 	log.Printf("M=setUpFollowHandler payload=%v userID=%v steamID=%v\n", m.Payload, userID, steamID)
 
 	if err != nil {
-		bot.Send(m.Chat, err.Error())
+		log.Printf(`M=setUpFollowHandler err=%s`, err.Error())
 		return -1
 	} else if len(steamID) != util.SteamIDLength || !isNumeric(steamID) {
-		bot.Send(m.Chat, "Invalid Param!")
+		_, err = bot.Send(m.Chat, "Invalid Param!")
+		if err != nil {
+			log.Printf(`M=setUpFollowHandler step=send err=%s`, err.Error())
+			return 0
+		}
 		return -1
 	}
 
@@ -96,10 +97,13 @@ func setUpUnfollowHandler(m *tb.Message, bot *tb.Bot) {
 	log.Printf("M=setUpUnfollowHandler chatID=%v steamID=%v\n", m.Chat.ID, steamID)
 
 	if err != nil {
-		bot.Send(m.Chat, err.Error())
+		log.Printf(`M=setUpUnfollowHandler err=%s`, err.Error())
 		return
 	} else if len(steamID) != util.SteamIDLength || !isNumeric(steamID) {
-		bot.Send(m.Chat, "Invalid Param!")
+		_, err = bot.Send(m.Chat, "Invalid Param!")
+		if err != nil {
+			log.Printf(`M=setUpUnfollowHandler step=send err=%s`, err.Error())
+		}
 		return
 	}
 
@@ -115,9 +119,8 @@ func setUpSummaryHandler(m *tb.Message, bot *tb.Bot) {
 
 func setUpChooserHandler(m *tb.Message, bot *tb.Bot) {
 	log.Printf("M=setUpChooserHandler telegramID=%v\n", m.Chat.ID)
-	userID := UserServiceClient.getUserID(m.Chat)
 
-	handler.HandleChooserRequest(m, bot, userID)
+	handler.HandleChooserRequest(m, bot)
 }
 
 func isNumeric(s string) bool {

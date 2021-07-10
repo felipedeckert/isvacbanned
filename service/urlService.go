@@ -43,7 +43,7 @@ func (u urlService) getSteamID(param string) (string, error) {
 		steamID, err = getPlayerSteamID(param)
 		if err != nil {
 			log.Printf("M=getSteamID status=notACustomID param=%v\n", param)
-			steamID = param
+			return "", err
 		}
 	}
 
@@ -57,9 +57,9 @@ func getArgumentFromURL(url string) (string, error) {
 		url = url[:last]
 	}
 
-	splittedInput := strings.Split(url, "/")
-	if len(splittedInput) < 2 {
+	splitInput := strings.Split(url, "/")
+	if len(splitInput) < 2 {
 		return "", errors.New("Invalid URL")
 	}
-	return splittedInput[len(splittedInput)-1], nil
+	return splitInput[len(splitInput)-1], nil
 }

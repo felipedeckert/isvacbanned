@@ -42,7 +42,7 @@ func (m Messenger) SendMessageToChat(bot *tb.Bot, chat *tb.Chat, message string)
 func (m Messenger) SendMessageToUser(message string, chatID int64) {
 	token := os.Getenv("TOKEN")
 
-	sendMessageURL := telegramAPIURL + token + telegramMethod + telegramChatIDParam + strconv.FormatInt(chatID, 10) + telegramTextParam + message
+	sendMessageURL := telegramAPIURL + token + telegramMethod + telegramChatIDParam + strconv.FormatInt(chatID, 10) + telegramTextParam + url.QueryEscape(message)
 
 	parsedURL, err := url.Parse("#"+sendMessageURL)
 

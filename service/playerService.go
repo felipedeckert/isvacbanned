@@ -63,17 +63,6 @@ func init() {
 	Client = &http.Client{}
 }
 
-func updatePlayersIfNeeded(players map[string]Player, spreadsheetID string) {
-	log.Printf("M=updatePlayersIfNeeded")
-	for idx, p := range players {
-		data := p.Players[0]
-		if data.VACBanned {
-			log.Printf("M=updatePlayersIfNeeded VAC " + data.SteamId)
-			UpdateVACBanStatus(idx, data.DaysSinceLastBan, spreadsheetID)
-		}
-	}
-}
-
 // UnmarshalPlayerByID returns a player and its data obtained from Steam API
 func unmarshalPlayer(jsonInput []byte) Player {
 	player := Player{}

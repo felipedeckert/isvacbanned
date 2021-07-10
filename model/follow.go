@@ -16,7 +16,7 @@ type FollowModelInterface interface {
 	FollowSteamUser(chatID int64, steamID, currNickname string, userID int64) int64
 	UnfollowSteamUser(userID int64, steamID string) int64
 	GetFollowerCountBySteamID(steamID string) (int64, error)
-	GetAllIncompletedFollowedUsers() map[int64][]UsersFollowed
+	GetAllIncompleteFollowedUsers() map[int64][]UsersFollowed
 	GetUsersFollowed(userID int64) []UsersFollowed
 	SetCurrNickname(userID int64, sanitizedActualNickname string)
 	SetFollowedUserToCompleted(id []int64) int64
@@ -97,8 +97,8 @@ func (f FollowModel) GetFollowerCountBySteamID(steamID string) (int64, error) {
 	return count, err
 }
 
-//GetAllIncompletedFollowedUsers get all fallowed steam user for every telegram user
-func (f FollowModel) GetAllIncompletedFollowedUsers() map[int64][]UsersFollowed {
+//GetAllIncompleteFollowedUsers get all fallowed steam user for every telegram user
+func (f FollowModel) GetAllIncompleteFollowedUsers() map[int64][]UsersFollowed {
 
 	rows, err := util.GetDatabase().Query("SELECT f.id, f.chat_id, f.steam_id, f.old_nickname, f.curr_nickname " +
 		"FROM follow f " +

@@ -39,7 +39,7 @@
 //   sheetsService, err := sheets.NewService(ctx, option.WithTokenSource(config.TokenSource(ctx, token)))
 //
 // See https://godoc.org/google.golang.org/api/option/ for details on options.
-package sheets
+package sheets // import "google.golang.org/api/sheets/v4"
 
 import (
 	"bytes"

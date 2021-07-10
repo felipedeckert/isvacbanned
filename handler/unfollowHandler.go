@@ -16,7 +16,7 @@ type UnfollowHandlerInterface interface {
 
 var UnfollowHandlerClient UnfollowHandlerInterface = UnfollowHandler{}
 
-//UnfollowHandler handles a follow request
+//HandleUnfollowRequest handles a follow request
 func (f UnfollowHandler) HandleUnfollowRequest(m *tb.Message, bot *tb.Bot, steamID string, userID int64) {
 
 	rows := model.FollowModelClient.UnfollowSteamUser(userID, steamID)

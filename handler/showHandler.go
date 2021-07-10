@@ -23,7 +23,11 @@ func sendShowResponse(followedUsers []model.UsersFollowed, bot *tb.Bot, m *tb.Me
 	total := len(followedUsers)
 
 	if total == 0 {
-		bot.Send(m.Chat, "You're not following any player yet!")
+		_, err := bot.Send(m.Chat, "You're not following any player yet!")
+		if err != nil {
+			log.Printf("M=sendShowResponse err=%s", err.Error())
+			return
+		}
 	}
 
 	sendMessageBatch(followedUsers, bot, m)
@@ -50,7 +54,10 @@ func sendMessageBatch(followedUsers []model.UsersFollowed, bot *tb.Bot, m *tb.Me
 	}
 
 	if sb.Len() > 0 {
-		bot.Send(m.Chat, sb.String())
+		_, err := bot.Send(m.Chat, sb.String())
+		if err != nil {
+			log.Printf("M=sendMessageBatch err=%s", err.Error())
+		}
 	}
 
 }

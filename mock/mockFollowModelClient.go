@@ -7,7 +7,7 @@ type FollowModelClient struct {
 	GetFollowSteamUser                func(chatID int64, steamID, currNickname string, userID int64) int64
 	GetUnfollowSteamUser              func(userID int64, steamID string) int64
 	GetGetFollowerCountBySteamID      func(steamID string) (int64, error)
-	GetGetAllIncompletedFollowedUsers func() map[int64][]model.UsersFollowed
+	GetGetAllIncompleteFollowedUsers func() map[int64][]model.UsersFollowed
 	GetGetUsersFollowed               func(userID int64) []model.UsersFollowed
 	GetSetCurrNickname                func(userId int64, sanitizedActualNickname string)
 	GetSetFollowedUserToCompleted     func(id []int64) int64
@@ -26,8 +26,8 @@ func (f *FollowModelClient) GetFollowerCountBySteamID(steamID string) (int64, er
 	return GetGetFollowerCountBySteamID(steamID)
 }
 
-func (f *FollowModelClient) GetAllIncompletedFollowedUsers() map[int64][]model.UsersFollowed {
-	return GetGetAllIncompletedFollowedUsers()
+func (f *FollowModelClient) GetAllIncompleteFollowedUsers() map[int64][]model.UsersFollowed {
+	return GetGetAllIncompleteFollowedUsers()
 }
 
 func (f *FollowModelClient) GetUsersFollowed(userID int64) []model.UsersFollowed {
@@ -50,7 +50,7 @@ var (
 	GetFollowSteamUser                func(chatID int64, steamID, currNickname string, userID int64) int64
 	GetUnfollowSteamUser              func(userID int64, steamID string) int64
 	GetGetFollowerCountBySteamID      func(steamID string) (int64, error)
-	GetGetAllIncompletedFollowedUsers func() map[int64][]model.UsersFollowed
+	GetGetAllIncompleteFollowedUsers func() map[int64][]model.UsersFollowed
 	GetGetUsersFollowed               func(userID int64) []model.UsersFollowed
 	GetSetCurrNickname                func(userId int64, sanitizedActualNickname string)
 	GetSetFollowedUserToCompleted     func(id []int64) int64

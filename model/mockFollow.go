@@ -17,8 +17,8 @@ func (f FollowMock) GetFollowerCountBySteamID(steamID string) (int64, error) {
 	return int64(350), nil
 }
 
-//GetAllIncompletedFollowedUsers is the mock implementation of GetAllIncompletedFollowedUsers
-func (f FollowMock) GetAllIncompletedFollowedUsers() map[int64][]UsersFollowed {
+//GetAllIncompleteFollowedUsers is the mock implementation of GetAllIncompleteFollowedUsers
+func (f FollowMock) GetAllIncompleteFollowedUsers() map[int64][]UsersFollowed {
 	return make(map[int64][]UsersFollowed, 0)
 }
 

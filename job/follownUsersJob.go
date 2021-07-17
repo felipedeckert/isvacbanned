@@ -44,11 +44,11 @@ func checkFollowedUsersNickname() {
 
 	for chatID, steamIDList := range usersIncomplete {
 		for _, users := range steamIDList {
-			validateNicknameAndSendMessage(users, chatID)
+			go validateNicknameAndSendMessage(users, chatID)
 		}
 	}
 	elapsedTime := time.Since(currTime)
-	log.Printf("M=checkFollowedUsersNickname et=%d", int64(elapsedTime / time.Millisecond))
+	log.Printf("M=checkFollowedUsersNickname et=%dms", int64(elapsedTime / time.Millisecond))
 }
 
 func validateBanStatusAndSendMessage(user model.UsersFollowed, chatID int64) []int64 {
@@ -72,6 +72,7 @@ func validateBanStatusAndSendMessage(user model.UsersFollowed, chatID int64) []i
 func validateNicknameAndSendMessage(user model.UsersFollowed, chatID int64) {
 	actualNickname := service.PlayerServiceClient.GetPlayerCurrentNickname(user.SteamID)
 
+	//sometimes the request fails, and it comes empty, hence this validation
 	if actualNickname == "" {
 		log.Printf("M=validateNicknameAndSendMessage L=E steamID=%v status=emptyCurrentNickname\n", user.SteamID)
 	} else if user.CurrNickname != actualNickname {

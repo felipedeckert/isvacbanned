@@ -39,6 +39,7 @@ func checkFollowedUsersBan() {
 }
 
 func checkFollowedUsersNickname() {
+	currTime := time.Now()
 	usersIncomplete := model.FollowModelClient.GetAllIncompleteFollowedUsers()
 
 	for chatID, steamIDList := range usersIncomplete {
@@ -46,6 +47,8 @@ func checkFollowedUsersNickname() {
 			validateNicknameAndSendMessage(users, chatID)
 		}
 	}
+	elapsedTime := time.Since(currTime)
+	log.Printf("M=checkFollowedUsersNickname et=%d", int64(elapsedTime / time.Millisecond))
 }
 
 func validateBanStatusAndSendMessage(user model.UsersFollowed, chatID int64) []int64 {

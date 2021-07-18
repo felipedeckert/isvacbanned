@@ -31,6 +31,7 @@ func checkFollowedUsersBan() {
 
 	for chatID, steamIDList := range usersIncomplete {
 		for _, users := range steamIDList {
+			wg.Add(1)
 			go validateBanStatusAndSendMessage(users, chatID, &wg)
 		}
 	}

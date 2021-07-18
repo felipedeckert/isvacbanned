@@ -17,8 +17,8 @@ func RunScheduler() {
 	log.Printf("M=RunScheduler\n")
 	scheduler := gocron.NewScheduler(time.UTC)
 
-	scheduler.Every(1).Minutes().Do(checkFollowedUsersBan)
-	scheduler.Every(1).Minutes().Do(checkFollowedUsersNickname)
+	scheduler.Every(60).Minutes().Do(checkFollowedUsersBan)
+	scheduler.Every(10).Minutes().Do(checkFollowedUsersNickname)
 
 	scheduler.StartAsync()
 }

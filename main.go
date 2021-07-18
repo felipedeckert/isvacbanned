@@ -4,24 +4,14 @@ import (
 	"isvacbanned/job"
 	"isvacbanned/service"
 	"isvacbanned/util"
-	"log"
 	"os"
 
 	tb "gopkg.in/tucnak/telebot.v2"
 )
 
 func main() {
-
-	//Receives a google drive spreadsheet ID as argument and updates vac ban status
-	/*
-		sheetID := os.Args[1]
-		fmt.Printf("M=main spreadsheetID=%v step=2 \n", sheetID)
-		service.UpdatePlayersStatus(sheetID)
-	*/
-
 	startTelegramBot()
 	job.RunScheduler()
-
 }
 
 func startTelegramBot() {
@@ -41,6 +31,4 @@ func startTelegramBot() {
 	go job.RunScheduler()
 
 	service.SetUpBot(webhook, token)
-
-	log.Println("END")
 }

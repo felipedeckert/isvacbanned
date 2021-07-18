@@ -6,6 +6,7 @@ import (
 	"isvacbanned/service"
 	"isvacbanned/util"
 	"log"
+	"sync"
 	"time"
 
 	"github.com/go-co-op/gocron"
@@ -23,32 +24,42 @@ func RunScheduler() {
 }
 
 func checkFollowedUsersBan() {
+	log.Print("M=checkFollownUsersBan step=start")
+	currTime := time.Now()
 	usersIncomplete := model.FollowModelClient.GetAllIncompleteFollowedUsers()
-	var usersToComplete []int64
+	var wg sync.WaitGroup
+
 	for chatID, steamIDList := range usersIncomplete {
 		for _, users := range steamIDList {
-			usersToComplete = append(usersToComplete, validateBanStatusAndSendMessage(users, chatID)...)
+			wg.Add(1)
+			go validateBanStatusAndSendMessage(users, chatID, &wg)
 		}
 	}
-	if len(usersToComplete) > 0 {
-		//Once a player status is set to completed, this player will not be returned in the GetAllIncompleteFollowedUsers query
-		model.FollowModelClient.SetFollowedUserToCompleted(usersToComplete)
-	}
-
-	log.Printf("M=checkFollownUsersBan usersToCompleteCount=%v\n", len(usersToComplete))
+	wg.Wait()
+	elapsedTime := time.Since(currTime)
+	log.Printf("M=checkFollownUsersBan step=end et=%dms", int64(elapsedTime/time.Millisecond))
 }
 
 func checkFollowedUsersNickname() {
+	log.Print("M=checkFollowedUsersNickname step=start")
+	currTime := time.Now()
 	usersIncomplete := model.FollowModelClient.GetAllIncompleteFollowedUsers()
+
+	var wg sync.WaitGroup
 
 	for chatID, steamIDList := range usersIncomplete {
 		for _, users := range steamIDList {
-			validateNicknameAndSendMessage(users, chatID)
+			wg.Add(1)
+			go validateNicknameAndSendMessage(users, chatID, &wg)
 		}
 	}
+	wg.Wait()
+	elapsedTime := time.Since(currTime)
+	log.Printf("M=checkFollowedUsersNickname step=end et=%dms", int64(elapsedTime/time.Millisecond))
 }
 
-func validateBanStatusAndSendMessage(user model.UsersFollowed, chatID int64) []int64 {
+func validateBanStatusAndSendMessage(user model.UsersFollowed, chatID int64, wg *sync.WaitGroup) {
+	defer wg.Done()
 	idsToUpdate := make([]int64, 0)
 	player := service.PlayerServiceClient.GetPlayerStatus(user.SteamID)
 	if len(player.Players) > 0 {
@@ -63,12 +74,18 @@ func validateBanStatusAndSendMessage(user model.UsersFollowed, chatID int64) []i
 			}
 		}
 	}
-	return idsToUpdate
+
+	if len(idsToUpdate) > 0 {
+		//Once a player status is set to completed, this player will not be returned in the GetAllIncompleteFollowedUsers query
+		model.FollowModelClient.SetFollowedUserToCompleted(idsToUpdate)
+	}
 }
 
-func validateNicknameAndSendMessage(user model.UsersFollowed, chatID int64) {
+func validateNicknameAndSendMessage(user model.UsersFollowed, chatID int64, wg *sync.WaitGroup) {
+	defer wg.Done()
 	actualNickname := service.PlayerServiceClient.GetPlayerCurrentNickname(user.SteamID)
 
+	//sometimes the request fails, and it comes empty, hence this validation
 	if actualNickname == "" {
 		log.Printf("M=validateNicknameAndSendMessage L=E steamID=%v status=emptyCurrentNickname\n", user.SteamID)
 	} else if user.CurrNickname != actualNickname {

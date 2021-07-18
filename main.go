@@ -11,7 +11,7 @@ import (
 
 func main() {
 	startTelegramBot()
-	job.RunScheduler()
+	go job.RunScheduler()
 }
 
 func startTelegramBot() {

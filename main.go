@@ -11,7 +11,7 @@ import (
 
 func main() {
 	startTelegramBot()
-	go job.RunScheduler()
+	job.RunScheduler()
 }
 
 func startTelegramBot() {
@@ -27,6 +27,8 @@ func startTelegramBot() {
 		Listen:   ":" + port,
 		Endpoint: &tb.WebhookEndpoint{PublicURL: publicURL},
 	}
+
+	go job.RunScheduler()
 
 	service.SetUpBot(webhook, token)
 }

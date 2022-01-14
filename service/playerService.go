@@ -139,6 +139,8 @@ func getPlayerSteamID(playerName string) (string, error) {
 		return "", errors.New("unable to parse player")
 	}
 
+	log.Printf("M=getPlayerSteamID steamID=%v\n", string(result))
+	
 	res, err := unmarshalSteamID(result)
 
 	if err != nil {

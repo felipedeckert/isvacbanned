@@ -1,6 +1,6 @@
 package util
 
-const valveKey = "DD5F4C5D083B1C9F7AB2CCAC76124DEC"
+const valveKey = "90240039B75F781DA2557041545128DC"
 const vacBanURL = "http://api.steampowered.com/ISteamUser/GetPlayerBans/v1/?key="
 const userURL = "http://api.steampowered.com/ISteamUser/ResolveVanityURL/v0001/?key="
 const playerSummaryURL = "http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key="

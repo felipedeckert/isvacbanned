@@ -1,11 +1,20 @@
 package util
 
-const valveKey = "90240039B75F781DA2557041545128DC"
-const vacBanURL = "http://api.steampowered.com/ISteamUser/GetPlayerBans/v1/?key="
-const userURL = "http://api.steampowered.com/ISteamUser/ResolveVanityURL/v0001/?key="
-const playerSummaryURL = "http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key="
-const userParamKey = "&vanityurl="
-const steamIDParamKey = "&steamids="
+import "os"
+
+const (
+	vacBanURL = "http://api.steampowered.com/ISteamUser/GetPlayerBans/v1/?key="
+	userURL = "http://api.steampowered.com/ISteamUser/ResolveVanityURL/v0001/?key="
+ 	playerSummaryURL = "http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key="
+ 	userParamKey = "&vanityurl="
+ 	steamIDParamKey = "&steamids="
+)
+
+var valveKey string
+
+func init() {
+	valveKey = os.Getenv("STEAM_API_KEY")
+}
 
 //GetPlayerSummaryURL returns the URL to get the player's summary
 func GetPlayerSummaryURL(steamID string) string {

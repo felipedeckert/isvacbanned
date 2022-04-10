@@ -40,8 +40,8 @@ func StartDatabase() {
 	}
 
 	db.SetMaxIdleConns(0)
-	db.SetMaxOpenConns(20)
-	db.SetConnMaxLifetime(time.Duration(600) * time.Second)
+	db.SetMaxOpenConns(100)
+	db.SetConnMaxLifetime(time.Duration(60) * time.Second)
 
 	Database = db
 	mutex.Unlock()

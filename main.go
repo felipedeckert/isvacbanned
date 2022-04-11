@@ -9,17 +9,17 @@ import (
 	tb "gopkg.in/tucnak/telebot.v2"
 )
 
+var ValveKey string
+
 func main() {
+	ValveKey = os.Getenv("TOKEN")
 	startTelegramBot()
 	job.RunScheduler()
 }
 
 func startTelegramBot() {
-	var (
-		port      = os.Getenv("PORT")
-		publicURL = os.Getenv("PUBLIC_URL")
-		token     = os.Getenv("TOKEN")
-	)
+	port      := os.Getenv("PORT")
+	publicURL := os.Getenv("PUBLIC_URL")
 
 	util.StartDatabase()
 
@@ -30,5 +30,5 @@ func startTelegramBot() {
 
 	go job.RunScheduler()
 
-	service.SetUpBot(webhook, token)
+	service.SetUpBot(webhook, ValveKey)
 }

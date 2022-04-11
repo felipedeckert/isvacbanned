@@ -113,6 +113,11 @@ func (p playerService) GetPlayerStatus(steamID string) Player {
 		log.Fatal(err)
 	}
 
+	if resp.StatusCode != http.StatusOK {
+		log.Printf(`M=GetPlayerStatus L=I http status not OK, actual status:%d`, resp.StatusCode)
+		return Player{}
+	}
+
 	result, err := ioutil.ReadAll(resp.Body)
 	defer resp.Body.Close()
 	if err != nil {
@@ -159,6 +164,11 @@ func (p playerService) GetPlayerCurrentNickname(steamID string) string {
 	if err != nil {
 		log.Printf("M=GetPlayerCurrentNickname err=%s\n", err)
 		log.Fatal(err)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		log.Printf(`M=GetPlayerCurrentNickname L=I http status not OK, actual status:%d`, resp.StatusCode)
+		return ""
 	}
 
 	result, err := ioutil.ReadAll(resp.Body)

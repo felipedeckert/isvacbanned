@@ -15,9 +15,11 @@ func main() {
 }
 
 func startTelegramBot() {
-	port      	  := os.Getenv("PORT")
-	publicURL 	  := os.Getenv("PUBLIC_URL")
-	telegramToken := os.Getenv("TOKEN")
+	var (
+		port      = os.Getenv("PORT")
+		publicURL = os.Getenv("PUBLIC_URL")
+		token     = os.Getenv("TOKEN")
+	)
 
 	util.StartDatabase()
 
@@ -28,5 +30,5 @@ func startTelegramBot() {
 
 	go job.RunScheduler()
 
-	service.SetUpBot(webhook, os.Getenv(telegramToken))
+	service.SetUpBot(webhook, token)
 }

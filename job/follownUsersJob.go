@@ -24,7 +24,7 @@ func RunScheduler() {
 }
 
 func checkFollowedUsersBan() {
-	log.Print("M=checkFollownUsersBan step=start")
+	log.Print("M=checkFollowedUsersBan step=start")
 	currTime := time.Now()
 	usersIncomplete := model.FollowModelClient.GetAllIncompleteFollowedUsers()
 	var wg sync.WaitGroup
@@ -62,8 +62,8 @@ func validateBanStatusAndSendMessage(user model.UsersFollowed, chatID int64, wg 
 	defer wg.Done()
 	idsToUpdate := make([]int64, 0)
 	player := service.PlayerServiceClient.GetPlayerStatus(user.SteamID)
-	if len(player.Players) > 0 {
 
+	if len(player.Players) > 0 {
 		playerData := player.Players[0]
 		if playerData.VACBanned {
 			actualNickname := service.PlayerServiceClient.GetPlayerCurrentNickname(user.SteamID)

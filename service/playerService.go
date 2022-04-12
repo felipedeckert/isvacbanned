@@ -177,7 +177,7 @@ func (p playerService) GetPlayerCurrentNickname(steamID string) string {
 			log.Fatal(err)
 		}
 
-		log.Printf(`M=GetPlayerCurrentNickname L=I http status not OK, actual status:%d\n response:%s`, resp.StatusCode, string(result))
+		log.Printf(`M=GetPlayerCurrentNickname L=I http status not OK, actual status:%d\n response:%s header:%v`, resp.StatusCode, string(result), resp.Header)
 		return ""
 	}
 

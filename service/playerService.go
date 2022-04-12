@@ -114,7 +114,12 @@ func (p playerService) GetPlayerStatus(steamID string) Player {
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		log.Printf(`M=GetPlayerStatus L=I http status not OK, actual status:%d`, resp.StatusCode)
+		result, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		log.Printf(`M=GetPlayerStatus L=I http status not OK, actual status:%d\n response:%s`, resp.StatusCode, string(result))
 		return Player{}
 	}
 

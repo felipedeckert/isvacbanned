@@ -6,13 +6,15 @@ import (
 	"strings"
 )
 
+//go:generate moq -stub -pkg mocks -out mocks/url_service.go . URLServiceInterface
+
 type urlService struct{}
 
-type UrlServiceInterface interface {
+type URLServiceInterface interface {
 	getSteamID(param string) (string, error)
 }
 
-var UrlServiceClient UrlServiceInterface = urlService{}
+var UrlServiceClient URLServiceInterface = urlService{}
 
 func (u urlService) getSteamID(param string) (string, error) {
 	steamID := param
@@ -39,7 +41,8 @@ func (u urlService) getSteamID(param string) (string, error) {
 
 			return "", err
 		}
-	} else { // CustomID without URL
+	} else {
+		// CustomID without URL
 		steamID, err = getPlayerSteamID(param)
 		if err != nil {
 			log.Printf("M=getSteamID status=notACustomID param=%v\n", param)

@@ -12,22 +12,35 @@ const (
 )
 
 //GetPlayerSummaryURL returns the URL to get the player's summary
-func GetPlayerSummaryURL(steamID string) string {
-	//todo change to debug level
-	//log.Printf("M=buildGetPlayerSummaryURL SteamID=%s\n", steamID)
-	return playerSummaryURL + os.Getenv(steamToken) + steamIDParamKey + steamID
+func GetPlayerSummaryURL(steamIDs ...string) string {
+	concatenatedIDs := ""
+
+	for i, id := range steamIDs {
+		concatenatedIDs += id
+		if i + 1 < len(steamIDs) {
+			concatenatedIDs += ","
+		}
+	}
+
+	return playerSummaryURL + os.Getenv(steamToken) + steamIDParamKey + concatenatedIDs
 }
 
 //GetNicknameURL returns the URL to get the player's current nickname
 func GetNicknameURL(userName string) string {
-	//todo change to debug level
-	//log.Printf("M=buildGetUserURL userName=%s\n", userName)
+
 	return userURL + os.Getenv(steamToken) + userParamKey + userName
 }
 
 //GetVACBanURL returns the URL to get the player's ban status
-func GetVACBanURL(steamID string) string {
-	//todo change to debug level
-	//log.Printf("M=buildGetURL steamID=%s\n", steamID)
-	return vacBanURL + os.Getenv(steamToken) + steamIDParamKey + steamID
+func GetVACBanURL(steamIDs ...string) string {
+	concatenatedIDs := ""
+
+	for i, id := range steamIDs {
+		concatenatedIDs += id
+		if i + 1 < len(steamIDs) {
+			concatenatedIDs += ","
+		}
+	}
+
+	return vacBanURL + os.Getenv(steamToken) + steamIDParamKey + concatenatedIDs
 }

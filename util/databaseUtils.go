@@ -19,7 +19,7 @@ func GetDatabase() *sql.DB {
 }
 
 //StartDatabase opens a database connection
-func StartDatabase() {
+func StartDatabase() *sql.DB {
 	var (
 		db  *sql.DB
 		err error
@@ -45,4 +45,5 @@ func StartDatabase() {
 
 	Database = db
 	mutex.Unlock()
+	return db
 }

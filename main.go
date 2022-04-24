@@ -14,6 +14,7 @@ import (
 	"os"
 	"strconv"
 
+	_ "github.com/go-sql-driver/mysql"
 	tb "gopkg.in/tucnak/telebot.v2"
 )
 

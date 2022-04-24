@@ -8,6 +8,7 @@ import (
 	"isvacbanned/util"
 	"log"
 	"net/http"
+	"strings"
 )
 
 //go:generate moq -stub -pkg mocks -out mocks/http_client.go . HTTPClient
@@ -22,11 +23,62 @@ type Steam struct {
 	HTTPClient HTTPClient
 }
 
+func (s *Steam) GetSteamID(param string) (string, error) {
+	steamID := param
+	var err error
+	var customID string
+
+	if strings.Contains(param, "id") { // URL with CustomID
+		customID, err = GetArgumentFromURL(param)
+		if err != nil {
+			log.Printf("M=getSteamID status=invalidCustomID param=%v\n", param)
+
+			return "", err
+		}
+		steamID, err = s.GetPlayerSteamID(customID)
+		if err != nil {
+			log.Printf("M=getSteamID status=CouldNotParseCustomID param=%s\n", param)
+
+			return "", err
+		}
+	} else if strings.Contains(param, "profile") { // URL with SteamID
+		steamID, err = GetArgumentFromURL(param)
+		if err != nil {
+			log.Printf("M=getSteamID status=invalidSteamID param=%s\n", param)
+
+			return "", err
+		}
+	} else {
+		// CustomID without URL
+		steamID, err = s.GetPlayerSteamID(param)
+		if err != nil {
+			log.Printf("M=getSteamID status=notACustomID param=%s\n", param)
+			return "", err
+		}
+	}
+
+	log.Printf("M=getSteamID input=%s argument=%s\n", param, steamID)
+
+	return steamID, nil
+}
+
+func GetArgumentFromURL(url string) (string, error) {
+	if last := len(url) - 1; last >= 0 && url[last] == '/' {
+		url = url[:last]
+	}
+
+	splitInput := strings.Split(url, "/")
+	if len(splitInput) < 2 {
+		return "", errors.New("invalid URL")
+	}
+	return splitInput[len(splitInput)-1], nil
+}
+
 func (s *Steam) GetPlayerSteamID(playerName string) (string, error) {
 	url := util.GetNicknameURL(playerName)
 	log.Printf("M=getPlayerSteamID playerName=%v\n", playerName)
-	resp, err := s.HTTPClient.Get(url)
 
+	resp, err := s.HTTPClient.Get(url)
 	if err != nil {
 		log.Printf("M=getPlayerSteamID step=get err=%s\n", err)
 		return "", errors.New("unable to get player")

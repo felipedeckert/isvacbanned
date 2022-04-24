@@ -11,8 +11,7 @@ import (
 )
 
 func TestUnfollowPlayerUseCase_SetUpUnfollowHandler_Success(t *testing.T) {
-
-	steamGatewayMock := &mocks.UnfollowPlayerSteamGatewayMock{GetPlayerSteamIDFunc: func(playerName string) (string, error) {
+	steamGatewayMock := &mocks.UnfollowPlayerSteamGatewayMock{GetSteamIDFunc: func(playerName string) (string, error) {
 		return "76561197960690195", nil
 	}}
 

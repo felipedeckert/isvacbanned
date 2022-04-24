@@ -18,8 +18,8 @@ var _ telegrambot.UnfollowPlayerSteamGateway = &UnfollowPlayerSteamGatewayMock{}
 //
 // 		// make and configure a mocked telegrambot.UnfollowPlayerSteamGateway
 // 		mockedUnfollowPlayerSteamGateway := &UnfollowPlayerSteamGatewayMock{
-// 			GetPlayerSteamIDFunc: func(playerName string) (string, error) {
-// 				panic("mock out the GetPlayerSteamID method")
+// 			GetSteamIDFunc: func(param string) (string, error) {
+// 				panic("mock out the GetSteamID method")
 // 			},
 // 		}
 //
@@ -28,51 +28,51 @@ var _ telegrambot.UnfollowPlayerSteamGateway = &UnfollowPlayerSteamGatewayMock{}
 //
 // 	}
 type UnfollowPlayerSteamGatewayMock struct {
-	// GetPlayerSteamIDFunc mocks the GetPlayerSteamID method.
-	GetPlayerSteamIDFunc func(playerName string) (string, error)
+	// GetSteamIDFunc mocks the GetSteamID method.
+	GetSteamIDFunc func(param string) (string, error)
 
 	// calls tracks calls to the methods.
 	calls struct {
-		// GetPlayerSteamID holds details about calls to the GetPlayerSteamID method.
-		GetPlayerSteamID []struct {
-			// PlayerName is the playerName argument value.
-			PlayerName string
+		// GetSteamID holds details about calls to the GetSteamID method.
+		GetSteamID []struct {
+			// Param is the param argument value.
+			Param string
 		}
 	}
-	lockGetPlayerSteamID sync.RWMutex
+	lockGetSteamID sync.RWMutex
 }
 
-// GetPlayerSteamID calls GetPlayerSteamIDFunc.
-func (mock *UnfollowPlayerSteamGatewayMock) GetPlayerSteamID(playerName string) (string, error) {
+// GetSteamID calls GetSteamIDFunc.
+func (mock *UnfollowPlayerSteamGatewayMock) GetSteamID(param string) (string, error) {
 	callInfo := struct {
-		PlayerName string
+		Param string
 	}{
-		PlayerName: playerName,
+		Param: param,
 	}
-	mock.lockGetPlayerSteamID.Lock()
-	mock.calls.GetPlayerSteamID = append(mock.calls.GetPlayerSteamID, callInfo)
-	mock.lockGetPlayerSteamID.Unlock()
-	if mock.GetPlayerSteamIDFunc == nil {
+	mock.lockGetSteamID.Lock()
+	mock.calls.GetSteamID = append(mock.calls.GetSteamID, callInfo)
+	mock.lockGetSteamID.Unlock()
+	if mock.GetSteamIDFunc == nil {
 		var (
 			sOut   string
 			errOut error
 		)
 		return sOut, errOut
 	}
-	return mock.GetPlayerSteamIDFunc(playerName)
+	return mock.GetSteamIDFunc(param)
 }
 
-// GetPlayerSteamIDCalls gets all the calls that were made to GetPlayerSteamID.
+// GetSteamIDCalls gets all the calls that were made to GetSteamID.
 // Check the length with:
-//     len(mockedUnfollowPlayerSteamGateway.GetPlayerSteamIDCalls())
-func (mock *UnfollowPlayerSteamGatewayMock) GetPlayerSteamIDCalls() []struct {
-	PlayerName string
+//     len(mockedUnfollowPlayerSteamGateway.GetSteamIDCalls())
+func (mock *UnfollowPlayerSteamGatewayMock) GetSteamIDCalls() []struct {
+	Param string
 } {
 	var calls []struct {
-		PlayerName string
+		Param string
 	}
-	mock.lockGetPlayerSteamID.RLock()
-	calls = mock.calls.GetPlayerSteamID
-	mock.lockGetPlayerSteamID.RUnlock()
+	mock.lockGetSteamID.RLock()
+	calls = mock.calls.GetSteamID
+	mock.lockGetSteamID.RUnlock()
 	return calls
 }

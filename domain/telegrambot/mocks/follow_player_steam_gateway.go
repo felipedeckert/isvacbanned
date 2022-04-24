@@ -28,6 +28,9 @@ var _ telegrambot.FollowPlayerSteamGateway = &FollowPlayerSteamGatewayMock{}
 // 			GetPlayersStatusFunc: func(steamIDs ...string) (entities.Player, error) {
 // 				panic("mock out the GetPlayersStatus method")
 // 			},
+// 			GetSteamIDFunc: func(param string) (string, error) {
+// 				panic("mock out the GetSteamID method")
+// 			},
 // 		}
 //
 // 		// use mockedFollowPlayerSteamGateway in code that requires telegrambot.FollowPlayerSteamGateway
@@ -43,6 +46,9 @@ type FollowPlayerSteamGatewayMock struct {
 
 	// GetPlayersStatusFunc mocks the GetPlayersStatus method.
 	GetPlayersStatusFunc func(steamIDs ...string) (entities.Player, error)
+
+	// GetSteamIDFunc mocks the GetSteamID method.
+	GetSteamIDFunc func(param string) (string, error)
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -61,10 +67,16 @@ type FollowPlayerSteamGatewayMock struct {
 			// SteamIDs is the steamIDs argument value.
 			SteamIDs []string
 		}
+		// GetSteamID holds details about calls to the GetSteamID method.
+		GetSteamID []struct {
+			// Param is the param argument value.
+			Param string
+		}
 	}
 	lockGetPlayerSteamID           sync.RWMutex
 	lockGetPlayersCurrentNicknames sync.RWMutex
 	lockGetPlayersStatus           sync.RWMutex
+	lockGetSteamID                 sync.RWMutex
 }
 
 // GetPlayerSteamID calls GetPlayerSteamIDFunc.
@@ -169,5 +181,40 @@ func (mock *FollowPlayerSteamGatewayMock) GetPlayersStatusCalls() []struct {
 	mock.lockGetPlayersStatus.RLock()
 	calls = mock.calls.GetPlayersStatus
 	mock.lockGetPlayersStatus.RUnlock()
+	return calls
+}
+
+// GetSteamID calls GetSteamIDFunc.
+func (mock *FollowPlayerSteamGatewayMock) GetSteamID(param string) (string, error) {
+	callInfo := struct {
+		Param string
+	}{
+		Param: param,
+	}
+	mock.lockGetSteamID.Lock()
+	mock.calls.GetSteamID = append(mock.calls.GetSteamID, callInfo)
+	mock.lockGetSteamID.Unlock()
+	if mock.GetSteamIDFunc == nil {
+		var (
+			sOut   string
+			errOut error
+		)
+		return sOut, errOut
+	}
+	return mock.GetSteamIDFunc(param)
+}
+
+// GetSteamIDCalls gets all the calls that were made to GetSteamID.
+// Check the length with:
+//     len(mockedFollowPlayerSteamGateway.GetSteamIDCalls())
+func (mock *FollowPlayerSteamGatewayMock) GetSteamIDCalls() []struct {
+	Param string
+} {
+	var calls []struct {
+		Param string
+	}
+	mock.lockGetSteamID.RLock()
+	calls = mock.calls.GetSteamID
+	mock.lockGetSteamID.RUnlock()
 	return calls
 }

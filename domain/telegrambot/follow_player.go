@@ -19,6 +19,7 @@ import (
 const steamIDLength = 17
 
 type FollowPlayerSteamGateway interface {
+	GetSteamID(param string) (string, error)
 	GetPlayerSteamID(playerName string) (string, error)
 	GetPlayersCurrentNicknames(steamIDs ...string) (entities.PlayerInfo, error)
 	GetPlayersStatus(steamIDs ...string) (entities.Player, error)
@@ -78,7 +79,7 @@ func (uc * FollowPlayerUseCase) SetUpFollowHandler(m *tb.Message, bot *tb.Bot) i
 		}
 	}
 
-	steamID, err := uc.SteamGateway.GetPlayerSteamID(m.Payload)
+	steamID, err := uc.SteamGateway.GetSteamID(m.Payload)
 	log.Printf("M=setUpFollowHandler payload=%s userID=%d steamID=%s\n", m.Payload, userID, steamID)
 
 	if err != nil {

@@ -15,7 +15,7 @@ import (
 //go:generate moq -stub -pkg mocks -out mocks/unfollow_player_telegram_gateway.go . UnfollowPlayerTelegramGateway
 
 type UnfollowPlayerSteamGateway interface {
-	GetPlayerSteamID(playerName string) (string, error)
+	GetSteamID(param string) (string, error)
 }
 
 type UnfollowPlayerUserPersistenceGateway interface {
@@ -67,8 +67,7 @@ func (uc * UnfollowPlayerUseCase) SetUpUnfollowHandler(m *tb.Message, bot *tb.Bo
 		}
 	}
 
-	steamID, err := uc.SteamGateway.GetPlayerSteamID(m.Payload)
-
+	steamID, err := uc.SteamGateway.GetSteamID(m.Payload)
 	log.Printf("M=setUpUnfollowHandler chatID=%v steamID=%v\n", m.Chat.ID, steamID)
 
 	if err != nil {

@@ -37,8 +37,7 @@ func (f *Follow) UnfollowSteamUser(ctx context.Context, userID int64, steamID st
 	query := `UPDATE follow 
 				SET is_active = false 
 				WHERE user_id = ? 
-				AND steam_id  = ?
-				RETURNING id`
+				AND steam_id  = ?`
 
 	stmt, err := f.PrepareContext(ctx, query)
 	if err != nil {
@@ -148,10 +147,9 @@ func (f *Follow) GetUsersFollowed(ctx context.Context, userID int64) ([]entities
 func (f *Follow) SetCurrNickname(ctx context.Context, userID int64, sanitizedActualNickname string) error {
 	query := `UPDATE follow 
 				SET curr_nickname = ? 
-				WHERE id = ?
-				RETURNING id`
+				WHERE id = ?`
 
-	stmt, err := f.Prepare(query)
+	stmt, err := f.PrepareContext(ctx, query)
 	if err != nil {
 		return err
 	}

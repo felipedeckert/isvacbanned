@@ -3,7 +3,6 @@ package telegrambot
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	tb "gopkg.in/tucnak/telebot.v2"
 	"isvacbanned/domain/entities"
 	"isvacbanned/util"
@@ -70,11 +69,11 @@ func (uc * FollowPlayerUseCase) SetUpFollowHandler(m *tb.Message, bot *tb.Bot) i
 		if err == sql.ErrNoRows {
 			userID, err = uc.UserPersistenceGateway.CreateUser(ctx, m.Chat.FirstName, m.Chat.Username, m.Chat.ID)
 			if err != nil {
-				log.Printf(fmt.Errorf(`M=setUpFollowHandler error creating user err:%w`, err).Error())
+				log.Printf(`M=setUpFollowHandler error creating user err:%s`, err.Error())
 				return -1
 			}
 		} else {
-			log.Printf(fmt.Errorf(`M=setUpFollowHandler error getting user err:%w`, err).Error())
+			log.Printf(`M=setUpFollowHandler error getting user err:%s`, err.Error())
 			return -1
 		}
 	}

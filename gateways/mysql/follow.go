@@ -3,8 +3,6 @@ package mysql
 import (
 	"context"
 	"database/sql"
-	"errors"
-	"fmt"
 	"isvacbanned/domain/entities"
 	"strconv"
 )
@@ -15,51 +13,65 @@ type Follow struct {
 
 // FollowSteamUser links a telegram user to a steam user which is being followed
 func (f *Follow) FollowSteamUser(ctx context.Context, chatID int64, steamID, currNickname string, userID int64) (int64, error) {
-	query := `INSERT INTO follow(chat_id, steam_id, user_id, old_nickname, curr_nickname) VALUES($1, $2, $3, $4, $5)
-				RETURNING id`
-
-	var id int64
-	err := f.QueryRowContext(ctx, query, chatID, steamID, userID, currNickname, currNickname).Scan(&id)
+	query := `INSERT INTO follow(chat_id, steam_id, user_id, old_nickname, curr_nickname) VALUES(?, ?, ?, ?, ?)`
+	stmt, err := f.Prepare(query)
 	if err != nil {
-		return -1, errors.New(fmt.Sprintf(`error inactivating user userID:%d err:%s`, userID, err.Error()))
+		return -1, err
+	}
+	res, err := stmt.ExecContext(ctx, chatID, steamID, userID, currNickname, currNickname)
+	if err != nil {
+		return -1, err
+	}
+	defer stmt.Close()
+	lastID, err := res.LastInsertId()
+
+	if err != nil {
+		return -1, err
 	}
 
-	return id, nil
+	return lastID, nil
 }
 
 // UnfollowSteamUser sets a followed player flag is_active to false
 func (f *Follow) UnfollowSteamUser(ctx context.Context, userID int64, steamID string) (int64, error) {
 	query := `UPDATE follow 
 				SET is_active = false 
-				WHERE user_id = $1 
-				AND steam_id  = $2
+				WHERE user_id = ? 
+				AND steam_id  = ?
 				RETURNING id`
 
-	var id int64
-	err := f.QueryRowContext(ctx, query, userID, steamID).Scan(&id)
+	stmt, err := f.PrepareContext(ctx, query)
 	if err != nil {
-		return -1, errors.New(fmt.Sprintf(`error inactivating user userID:%d err: %s`, userID, err.Error()))
+		return -1, err
+	}
+	res, err := stmt.ExecContext(ctx, userID, steamID)
+	if err != nil {
+		return -1, err
+	}
+	defer stmt.Close()
+	rowsAffected, err := res.RowsAffected()
+
+	if err != nil {
+		return -1, err
 	}
 
-	return id, nil
+	return rowsAffected, nil
 }
 
 //GetFollowerCountBySteamID get the number of followers of a steam player
 func (f *Follow) GetFollowerCountBySteamID(ctx context.Context, steamID string) (int64, error) {
-
 	query := `SELECT COUNT(f.id) as count 
 				FROM follow f 
-				WHERE f.steam_id = $1`
+				WHERE f.steam_id = ?`
 
 	var count int64
-	err := f.QueryRowContext(ctx, query,steamID).Scan(&count)
+	err := f.QueryRowContext(ctx, query, steamID).Scan(&count)
 
 	return count, err
 }
 
 //GetAllIncompleteFollowedUsers get all fallowed steam user for every telegram user
 func (f *Follow) GetAllIncompleteFollowedUsers(ctx context.Context) (map[int64][]entities.UsersFollowed, error) {
-
 	query := `SELECT f.id, f.chat_id, f.steam_id, f.old_nickname, f.curr_nickname 
 				FROM follow f 
 				JOIN user u 
@@ -101,10 +113,9 @@ func (f *Follow) GetAllIncompleteFollowedUsers(ctx context.Context) (map[int64][
 
 //GetUsersFollowed gets a slice os the nicknames (the old ones) of players followed by a user
 func (f *Follow) GetUsersFollowed(ctx context.Context, userID int64) ([]entities.UsersFollowed, error) {
-
 	query  := `SELECT old_nickname, is_completed 
 				FROM follow 
-				WHERE user_id = $1`
+				WHERE user_id = ?`
 
 	rows, err := f.QueryContext(ctx, query, userID)
 	if err != nil {
@@ -135,18 +146,20 @@ func (f *Follow) GetUsersFollowed(ctx context.Context, userID int64) ([]entities
 
 //SetCurrNickname updates de curr_nickname of a given player
 func (f *Follow) SetCurrNickname(ctx context.Context, userID int64, sanitizedActualNickname string) error {
-
 	query := `UPDATE follow 
-				SET curr_nickname = $1 
-				WHERE id = $2
+				SET curr_nickname = ? 
+				WHERE id = ?
 				RETURNING id`
 
-	var id int64
-	err := f.QueryRowContext(ctx, query, sanitizedActualNickname, userID).Scan(&id)
-
+	stmt, err := f.Prepare(query)
 	if err != nil {
 		return err
 	}
+	_, err = stmt.ExecContext(ctx, sanitizedActualNickname, userID)
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
 
 	return nil
 }
@@ -155,17 +168,16 @@ func (f *Follow) SetCurrNickname(ctx context.Context, userID int64, sanitizedAct
 func (f *Follow) SetFollowedUserToCompleted(ctx context.Context, id []int64) {
 	query := `UPDATE follow 
 				SET is_completed = true 
-				WHERE id IN($1)`
+				WHERE id IN(?)`
 
 	f.QueryRowContext(ctx, query, sliceToStringParam(id))
 }
 
 // GetUsersFollowedSummary returns a summary of players followed, separated by ban status
 func (f *Follow) GetUsersFollowedSummary(ctx context.Context, userID int64) (map[bool]int, error) {
-
 	query := `SELECT COUNT(id) as count, is_completed
 				FROM follow
-				WHERE user_id = $1
+				WHERE user_id = ?
 				AND is_active = 1
 				GROUP BY is_completed`
 
@@ -198,11 +210,10 @@ func (f *Follow) GetUsersFollowedSummary(ctx context.Context, userID int64) (map
 
 // IsFollowed checks if a user already follows a player
 func (f *Follow) IsFollowed(ctx context.Context, steamID string, userID int64) (string, int64, error) {
-
 	query := `SELECT old_nickname, id 
 				FROM follow 
-				WHERE steam_id = $1 
-				AND user_id = $2`
+				WHERE steam_id = ? 
+				AND user_id = ?`
 
 	var (
 		oldNickname string

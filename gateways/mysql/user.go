@@ -3,8 +3,6 @@ package mysql
 import (
 	"context"
 	"database/sql"
-	"errors"
-	"fmt"
 )
 
 type User struct {
@@ -18,7 +16,7 @@ func (u *User) GetUserID(ctx context.Context, telegramID int64) (int64, error) {
 	var userID int64
 	err := u.QueryRowContext(ctx, query, telegramID).Scan(&userID)
 	if err != nil {
-		return -1, errors.New(fmt.Sprintf(`error get userID telegramID:%d`, telegramID))
+		return -1, err
 	}
 
 	return userID, nil
@@ -33,7 +31,7 @@ func (u *User) CreateUser(ctx context.Context, firstName, username string, teleg
 
 	err := u.QueryRowContext(ctx, query, firstName, username, telegramID).Scan(&lastID)
 	if err != nil {
-		return -1, errors.New(fmt.Sprintf(`error creating user:%s`, firstName))
+		return -1, err
 	}
 
 	return lastID, nil
@@ -47,7 +45,7 @@ func (u *User) InactivateUser(ctx context.Context, userID int64) (int64, error) 
 	var id int64
 	err := u.QueryRowContext(ctx, query, userID).Scan(&id)
 	if err != nil {
-		return -1, errors.New(fmt.Sprintf(`error inactivating user userID:%d`, userID))
+		return -1, err
 	}
 
 	return id, nil
@@ -61,7 +59,7 @@ func (u *User) ActivateUser(ctx context.Context, userID int64) (int64, error) {
 	var id int64
 	err := u.QueryRowContext(ctx, query, userID).Scan(&id)
 	if err != nil {
-		return -1, errors.New(fmt.Sprintf(`error activating user userID:%d`, userID))
+		return -1, err
 	}
 
 	return id, nil

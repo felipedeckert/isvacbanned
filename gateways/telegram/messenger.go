@@ -46,7 +46,7 @@ func (m *Messenger) SendMessageToChat(bot *tb.Bot, chat *tb.Chat, message string
 
 //SendMessageToUser sends a message to user/group via telegram API
 func (m *Messenger) SendMessageToUser(message string, chatID int64) {
-	log.Println("M=SendMessageToUser step=start")
+	log.Printf("M=SendMessageToUser chatID=%d step=start\n", chatID)
 	token := os.Getenv("TOKEN")
 
 	sendMessageURL := telegramAPIURL + token + telegramMethod + telegramChatIDParam + strconv.FormatInt(chatID, 10) + telegramTextParam + url.QueryEscape(message)

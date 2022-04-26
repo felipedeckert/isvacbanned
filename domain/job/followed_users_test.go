@@ -13,11 +13,12 @@ import (
 
 func TestCheckFollowedUsersBan(t *testing.T){
 	var usersTotal int64 = 150
+	var followers int64 = 2
 	actualSetCurrNicknameFuncCalls := 0
 	actualSetFollowedUserToCompletedFuncCalls := 0
 	followPersistenceGatewayMock := &mocks.FollowedUsersJobFollowPersistenceGatewayMock{
 		GetAllIncompleteFollowedUsersFunc: func(ctx context.Context) (map[int64][]entities.UsersFollowed, error) {
-			return createGetAllIncompleteFollowedUsersResponse(usersTotal), nil
+			return createGetAllIncompleteFollowedUsersResponse(usersTotal, followers), nil
 		},
 		SetCurrNicknameFunc: func(ctx context.Context, userID int64, sanitizedActualNickname string) error {
 			actualSetCurrNicknameFuncCalls++
@@ -30,8 +31,8 @@ func TestCheckFollowedUsersBan(t *testing.T){
 
 	banRatio := 20
 	nicknameChangedRatio := 10
-	actualGetPlayersStatusFuncCalls := 0
-	actualGetPlayersCurrentNicknamesFuncCalls := 0
+	var actualGetPlayersStatusFuncCalls int64 = 0
+	var actualGetPlayersCurrentNicknamesFuncCalls int64 = 0
 	steamGatewayMock := &mocks.FollowedUsersJobSteamGatewayMock{
 		GetPlayersCurrentNicknamesFunc: func(steamIDs ...string) (entities.PlayerInfo, error) {
 			actualGetPlayersCurrentNicknamesFuncCalls++
@@ -43,7 +44,7 @@ func TestCheckFollowedUsersBan(t *testing.T){
 		},
 	}
 
-	telegramActualCalls := 0
+	var telegramActualCalls int64 = 0
 	telegramGatewayMock := &mocks.FollowedUsersJobTelegramGatewayMock{
 		SendMessageToUserFunc: func(message string, chatID int64) {
 			telegramActualCalls++
@@ -53,23 +54,24 @@ func TestCheckFollowedUsersBan(t *testing.T){
 	useCase := job.NewFollowedUsersJobUseCase(followPersistenceGatewayMock, steamGatewayMock, telegramGatewayMock)
 
 	useCase.CheckFollowedUsersBan(context.Background())
-	getPlayersCurrentNicknamesFuncExpectedCalls := int(math.Ceil(float64(usersTotal)/100.00))
+	getPlayersCurrentNicknamesFuncExpectedCalls := int64(math.Ceil(float64(usersTotal)/100.00)) * followers
 	require.Equal(t, getPlayersCurrentNicknamesFuncExpectedCalls, actualGetPlayersCurrentNicknamesFuncCalls)
 
-	getPlayersStatusFuncExpectedCalls := int(math.Ceil(float64(usersTotal)/100.00))
+	getPlayersStatusFuncExpectedCalls := int64(math.Ceil(float64(usersTotal)/100.00)) * followers
 	require.Equal(t, getPlayersStatusFuncExpectedCalls, actualGetPlayersStatusFuncCalls)
 
-	expectedTelegramCalls := int(math.Floor(float64(usersTotal)/float64(banRatio))) + 1
+	expectedTelegramCalls := int64(math.Floor(float64(usersTotal)/float64(banRatio) * float64(followers))) + 1
 	require.Equal(t, expectedTelegramCalls, telegramActualCalls)
 }
 
 func TestCheckFollowedUsersNickname(t *testing.T){
 	var usersTotal int64 = 150
+	var followers int64 = 2
 	actualSetCurrNicknameFuncCalls := 0
 	actualSetFollowedUserToCompletedFuncCalls := 0
 	followPersistenceGatewayMock := &mocks.FollowedUsersJobFollowPersistenceGatewayMock{
 		GetAllIncompleteFollowedUsersFunc: func(ctx context.Context) (map[int64][]entities.UsersFollowed, error) {
-			return createGetAllIncompleteFollowedUsersResponse(usersTotal), nil
+			return createGetAllIncompleteFollowedUsersResponse(usersTotal, followers), nil
 		},
 		SetCurrNicknameFunc: func(ctx context.Context, userID int64, sanitizedActualNickname string) error {
 			actualSetCurrNicknameFuncCalls++
@@ -83,7 +85,7 @@ func TestCheckFollowedUsersNickname(t *testing.T){
 	banRatio := 20
 	nicknameChangedRatio := 10
 	actualGetPlayersStatusFuncCalls := 0
-	actualGetPlayersCurrentNicknamesFuncCalls := 0
+	var actualGetPlayersCurrentNicknamesFuncCalls int64 = 0
 	steamGatewayMock := &mocks.FollowedUsersJobSteamGatewayMock{
 		GetPlayersCurrentNicknamesFunc: func(steamIDs ...string) (entities.PlayerInfo, error) {
 			actualGetPlayersCurrentNicknamesFuncCalls++
@@ -95,7 +97,7 @@ func TestCheckFollowedUsersNickname(t *testing.T){
 		},
 	}
 
-	telegramActualCalls := 0
+	var telegramActualCalls int64 = 0
 	telegramGatewayMock := &mocks.FollowedUsersJobTelegramGatewayMock{
 		SendMessageToUserFunc: func(message string, chatID int64) {
 			telegramActualCalls++
@@ -105,13 +107,13 @@ func TestCheckFollowedUsersNickname(t *testing.T){
 	useCase := job.NewFollowedUsersJobUseCase(followPersistenceGatewayMock, steamGatewayMock, telegramGatewayMock)
 
 	useCase.CheckFollowedUsersNickname(context.Background())
-	getPlayersCurrentNicknamesFuncExpectedCalls := int(math.Ceil(float64(usersTotal)/100.00))
+	getPlayersCurrentNicknamesFuncExpectedCalls := int64(math.Ceil(float64(usersTotal)/100.00)) * followers
 	require.Equal(t, getPlayersCurrentNicknamesFuncExpectedCalls, actualGetPlayersCurrentNicknamesFuncCalls)
 
 	getPlayersStatusFuncExpectedCalls := 0
 	require.Equal(t, getPlayersStatusFuncExpectedCalls, actualGetPlayersStatusFuncCalls)
 
-	expectedTelegramCalls := int(math.Floor(float64(usersTotal)/float64(nicknameChangedRatio)))
+	expectedTelegramCalls := int64(math.Floor(float64(usersTotal)/float64(nicknameChangedRatio))) * followers
 	require.Equal(t, expectedTelegramCalls, telegramActualCalls)
 }
 
@@ -153,7 +155,18 @@ func createGetPlayersCurrentNicknamesFuncResponse(nicknameChangedRatio int, stea
 	return entities.PlayerInfo{Response: entities.PlayerNicknameData{Players: players}}
 }
 
-func createGetAllIncompleteFollowedUsersResponse(size int64) map[int64][]entities.UsersFollowed {
+func createGetAllIncompleteFollowedUsersResponse(usersFollowedAmount, followerAmount int64) map[int64][]entities.UsersFollowed {
+	myMap := make(map[int64][]entities.UsersFollowed)
+	for i := int64(0); i < followerAmount; i ++ {
+		usersList := getFollowedUsersList(usersFollowedAmount)
+		chatID := i
+		myMap[chatID] = usersList
+	}
+
+	return myMap
+}
+
+func getFollowedUsersList(size int64) []entities.UsersFollowed {
 	users := make([]entities.UsersFollowed, size)
 
 	for i := int64(0); i < size; i++{
@@ -167,9 +180,5 @@ func createGetAllIncompleteFollowedUsersResponse(size int64) map[int64][]entitie
 		}
 	}
 
-	myMap := make(map[int64][]entities.UsersFollowed)
-	chatID := int64(987)
-	myMap[chatID] = users
-
-	return myMap
+	return users
 }

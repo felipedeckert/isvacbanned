@@ -80,12 +80,12 @@ func (uc *FollowedUsersJobUseCase) CheckFollowedUsersBan(ctx context.Context) {
 				userGroupCopy := make([]entities.UsersFollowed, steamMaxInputLength)
 				copy(userGroupCopy, userGroup)
 				userGroup = make([]entities.UsersFollowed, 0)
-				go func() {
-					err = uc.validateBanStatusAndSendMessage(ctx, chatID, &wg, userGroupCopy...)
+				go func(ctx context.Context, chatID int64, wg *sync.WaitGroup, userGroup ...entities.UsersFollowed) {
+					err = uc.validateBanStatusAndSendMessage(ctx, chatID, wg, userGroupCopy...)
 					if err != nil {
 						log.Printf(`M=checkFollowedUsersBan step=1 L=E error validating status err:%s`, err.Error())
 					}
-				}()
+				}(ctx, chatID, &wg, userGroupCopy...)
 			}
 		}
 		if len(userGroup) > 0 {
@@ -93,12 +93,12 @@ func (uc *FollowedUsersJobUseCase) CheckFollowedUsersBan(ctx context.Context) {
 			userGroupCopy := make([]entities.UsersFollowed, len(userGroup))
 			copy(userGroupCopy, userGroup)
 			userGroup = make([]entities.UsersFollowed, 0)
-			go func() {
-				err = uc.validateBanStatusAndSendMessage(ctx, chatID, &wg, userGroupCopy...)
+			go func(ctx context.Context, chatID int64, wg *sync.WaitGroup, userGroup ...entities.UsersFollowed) {
+				err = uc.validateBanStatusAndSendMessage(ctx, chatID, wg, userGroupCopy...)
 				if err != nil {
 					log.Printf(`M=checkFollowedUsersBan step=2 L=E error validating status err:%s`, err.Error())
 				}
-			}()
+			}(ctx, chatID, &wg, userGroupCopy...)
 		}
 	}
 	wg.Wait()
@@ -124,12 +124,12 @@ func (uc *FollowedUsersJobUseCase) CheckFollowedUsersNickname(ctx context.Contex
 				copy(userGroupCopy, userGroup)
 				userGroup = make([]entities.UsersFollowed, 0)
 				wg.Add(1)
-				go func() {
-					err = uc.validateNicknameAndSendMessage(ctx, chatID, &wg, userGroupCopy...)
+				go func(ctx context.Context, chatID int64, wg *sync.WaitGroup, userGroup ...entities.UsersFollowed) {
+					err = uc.validateNicknameAndSendMessage(ctx, chatID, wg, userGroupCopy...)
 					if err != nil {
 						log.Printf(`M=checkFollowedUsersNickname step=1 L=E error validating nickname err:%s`, err.Error())
 					}
-				}()
+				}(ctx, chatID, &wg, userGroupCopy...)
 			}
 		}
 		if len(userGroup) > 0 {
@@ -137,12 +137,12 @@ func (uc *FollowedUsersJobUseCase) CheckFollowedUsersNickname(ctx context.Contex
 			userGroupCopy := make([]entities.UsersFollowed, len(userGroup))
 			copy(userGroupCopy, userGroup)
 			userGroup = make([]entities.UsersFollowed, 0)
-			go func() {
-				err = uc.validateNicknameAndSendMessage(ctx, chatID, &wg, userGroupCopy...)
+			go func(ctx context.Context, chatID int64, wg *sync.WaitGroup, userGroup ...entities.UsersFollowed) {
+				err = uc.validateNicknameAndSendMessage(ctx, chatID, wg, userGroupCopy...)
 				if err != nil {
 					log.Printf(`M=checkFollowedUsersNickname step=2 L=E error validating nickname err:%s`, err.Error())
 				}
-			}()
+			}(ctx, chatID, &wg, userGroupCopy...)
 		}
 	}
 
